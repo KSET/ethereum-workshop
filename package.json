@@ -12,6 +12,9 @@
     "react-dom": "^16.2.0",
     "react-scripts": "1.0.17"
   },
+  "devDependencies": {
+    "web3": "^1.0.0-beta.27"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

@@ -83,7 +83,7 @@ export class TicTacToe extends React.Component {
                 this.empty();
             }
             // Check if it's a draw
-            else if (this.moves == Math.pow(this.state.grid_size, 2)) {
+            else if (this.moves === Math.pow(this.state.grid_size, 2)) {
                 alert("It's a draw !");
                 this.empty();
             }
@@ -131,36 +131,36 @@ export class TicTacToe extends React.Component {
             for (var j = 0; j < this.state.grid_size; j++) {
 
                 // (00, 01, 02)  (10, 11, 12)  (20, 21, 22)
-                if (this.state.data[i + '' + j] == mark) {
+                if (this.state.data[i + '' + j] === mark) {
                     horizontal_count++;
                 }
 
                 // (00, 10, 20)  (01, 11, 21)  (02, 12, 22)
-                if (this.state.data[j + '' + i] == mark) {
+                if (this.state.data[j + '' + i] === mark) {
                     vertical_count++;
                 }
 
             }
 
             // (00, 11, 22)
-            if (this.state.data[i + '' + i] == mark) {
+            if (this.state.data[i + '' + i] === mark) {
                 left_to_right_count++;
             }
 
             // (this.state.grid_size - 1 - i) + '' + i ==> (02, 11, 20)
-            if (this.state.data[(this.state.grid_size - 1 - i) + '' + i] == mark) {
+            if (this.state.data[(this.state.grid_size - 1 - i) + '' + i] === mark) {
                 right_to_left_count++;
             }
 
             // If vertical/horizontal count matches the grid size in this loop then user has won
-            if (horizontal_count == this.state.grid_size || vertical_count == this.state.grid_size) {
+            if (horizontal_count === this.state.grid_size || vertical_count === this.state.grid_size) {
                 return true;
             }
 
         }
 
         // If diagonal count matches the grid size then user has won
-        if (left_to_right_count == this.state.grid_size || right_to_left_count == this.state.grid_size) {
+        if (left_to_right_count === this.state.grid_size || right_to_left_count === this.state.grid_size) {
             return true;
         }
 
