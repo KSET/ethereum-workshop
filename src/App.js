@@ -9,6 +9,8 @@ export default class App extends React.Component {
     constructor(props) {
         super(props);
 
+        this.onAccountChoose = this.onAccountChoose.bind(this);
+
         this.state = {
             account: null,
         }
@@ -26,9 +28,9 @@ export default class App extends React.Component {
                 <h1 className="title">Tic-Tac-Toe on Ethereum blockchain!</h1>
 
                 {this.state.account ?
-                    <TicTacToe />
+                    <TicTacToe web3={web3} account={this.state.account} />
                     :
-                    <AccountList web3={web3} />
+                    <AccountList web3={web3} onClick={this.onAccountChoose} />
                 }
             </div>
         );

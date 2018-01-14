@@ -183,7 +183,7 @@ export class TicTacToe extends React.Component {
 
                 <Scoreboard score={this.state.score}/>
 
-                <Board data={this.state.data} grid_size={this.state.grid_size} mark={this.mark.bind(this)}/>
+                <Board data={this.state.data} mark={this.mark.bind(this)}/>
 
                 <div>
                     <button onClick={this.empty.bind(this)}>

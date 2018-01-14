@@ -17,13 +17,11 @@ export class AccountList extends React.Component {
 
     render() {
         const { accounts } = this.state;
-        const { web3 } = this.props;
 
         return (
             accounts.map((account, index) => (
-                <button key={index}>
+                <button key={index} onClick={() => this.props.onClick(account)}>
                     {account}
-                    <ol>{web3.eth.getBalance(account).toString()}</ol>
                 </button>
             ))
         );
