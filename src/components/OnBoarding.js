@@ -10,7 +10,8 @@ export class AccountList extends React.Component {
 
     componentWillMount() {
         const { web3 } = this.props;
-        web3.eth.getAccounts().then((accounts) => {
+
+        web3.eth.getAccounts((error, accounts) => {
             this.setState({ accounts });
         })
     }

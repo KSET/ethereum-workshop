@@ -22,13 +22,18 @@ export default class App extends React.Component {
 
     render() {
         const web3 = Web3Instance.web3;
+        const contract = Web3Instance.contract;
 
         return (
             <div>
                 <h1 className="title">Tic-Tac-Toe on Ethereum blockchain!</h1>
 
                 {this.state.account ?
-                    <TicTacToe web3={web3} account={this.state.account} />
+                    <TicTacToe
+                        web3={web3}
+                        account={this.state.account}
+                        contract={contract}
+                    />
                     :
                     <AccountList web3={web3} onClick={this.onAccountChoose} />
                 }

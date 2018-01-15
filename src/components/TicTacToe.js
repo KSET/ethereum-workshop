@@ -53,10 +53,10 @@ export class TicTacToe extends React.Component {
     }
 
     subscribeToEvents() {
-        const { web3 } = this.props;
+        const { contract } = this.props;
 
-        subscribeToEvent(web3, 'BoardState', this.updateBoard);
-        subscribeToEvent(web3, 'GameResult', this.announceWinner);
+        subscribeToEvent(contract, 'BoardState', this.updateBoard);
+        subscribeToEvent(contract, 'GameResult', this.announceWinner);
     }
 
     announceWinner(event) {
