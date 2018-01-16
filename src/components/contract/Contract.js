@@ -6,8 +6,12 @@ export class Contract extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            contractAddress: ''
+            contractAddress: localStorage.getItem('contractAddress') || ''
         };
+        const {web3} = props;
+        if(!web3.eth.defaultAccount) {
+            this.props.history.push('/');
+        }
         this.submitContractAddress.bind(this);
         this.handleChange.bind(this);
     }
@@ -18,6 +22,7 @@ export class Contract extends React.Component {
 
     submitContractAddress = () => {
         const {web3} = this.props;
+        localStorage.setItem('contractAddress', this.state.contractAddress);
         setContract(web3, this.state.contractAddress);
         this.props.history.push('/room')
     };
