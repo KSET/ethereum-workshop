@@ -3,7 +3,7 @@ import React from 'react';
 import './App.css';
 import Web3Instance from './web3';
 import {TicTacToe} from "./components/TicTacToe";
-import {AccountList} from "./components/OnBoarding";
+import {AccountList, GamesList} from "./components/OnBoarding";
 
 export default class App extends React.Component {
     constructor(props) {
@@ -13,6 +13,7 @@ export default class App extends React.Component {
 
         this.state = {
             account: null,
+            gameId: null,
         }
     }
 
@@ -29,11 +30,14 @@ export default class App extends React.Component {
                 <h1 className="title">Tic-Tac-Toe on Ethereum blockchain!</h1>
 
                 {this.state.account ?
-                    <TicTacToe
-                        web3={web3}
-                        account={this.state.account}
-                        contract={contract}
-                    />
+                    this.state.gameId ?
+                        <TicTacToe
+                            web3={web3}
+                            account={this.state.account}
+                            contract={contract}
+                        />
+                        :
+                        <GamesList contract={contract} />
                     :
                     <AccountList web3={web3} onClick={this.onAccountChoose} />
                 }

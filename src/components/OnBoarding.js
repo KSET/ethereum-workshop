@@ -1,4 +1,5 @@
 import React from 'react'
+import {getListOfGames} from "../web3";
 
 export class AccountList extends React.Component {
     constructor(props) {
@@ -26,5 +27,33 @@ export class AccountList extends React.Component {
                 </button>
             ))
         );
+    }
+}
+
+export class GamesList extends React.PureComponent {
+    constructor(props) {
+        super(props);
+        this.state = {
+            games: [],
+        }
+    }
+
+    componentWillMount() {
+        const { contract } = this.props;
+
+        const games = getListOfGames(contract);
+        this.setState({ games });
+    }
+
+    render() {
+        const { games } = this.state;
+
+        return (
+            games.map((game, index) => (
+                <button key={index} onClick={() => this.props.onClick(game)}>
+                    {game}
+                </button>
+            ))
+        )
     }
 }
