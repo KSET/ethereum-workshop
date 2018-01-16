@@ -11,6 +11,7 @@ export class Contract extends React.Component {
         const {web3} = props;
         if(!web3.eth.defaultAccount) {
             this.props.history.push('/');
+            return;
         }
         this.submitContractAddress.bind(this);
         this.handleChange.bind(this);
