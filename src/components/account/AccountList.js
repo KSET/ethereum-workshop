@@ -19,7 +19,7 @@ export class AccountList extends React.Component {
     setAccount(account) {
         const { web3 } = this.props;
         console.log("Account chosen:", account);
-        web3.account = account;
+        web3.eth.defaultAccount = account;
         this.props.history.push('/contract')
     }
 
