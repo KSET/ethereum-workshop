@@ -1,6 +1,7 @@
 import React from 'react';
 import { createGame, listenOnGames } from '../../web3';
 import { Button, Col, FormControl, Row } from 'react-bootstrap';
+import GameState from '../../GameState';
 
 export class GameRoom extends React.Component {
 
@@ -23,10 +24,12 @@ export class GameRoom extends React.Component {
             return;
         }
         let that = this;
-        listenOnGames(web3.contract, function (game) {
-            let games = that.state.games;
-            games.push(game);
-            that.setState({games: games});
+        listenOnGames(web3.contract, function(game) {
+           let games = that.state.games;
+           if(game.status === GameState.WAITING) {
+               games.push(game);
+               that.setState({games: games});
+           }
         });
     }
 
