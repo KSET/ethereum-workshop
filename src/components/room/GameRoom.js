@@ -1,5 +1,6 @@
 import React from 'react';
 import { createGame, listenOnGames } from '../../web3';
+import GameState from '../../GameState';
 
 export class GameRoom extends React.Component {
 
@@ -24,8 +25,10 @@ export class GameRoom extends React.Component {
         let that = this;
         listenOnGames(web3.contract, function(game) {
            let games = that.state.games;
-           games.push(game);
-           that.setState({games: games});
+           if(game.status === GameState.WAITING) {
+               games.push(game);
+               that.setState({games: games});
+           }
         });
     }
 
@@ -50,14 +53,17 @@ export class GameRoom extends React.Component {
             <table>
                 <tbody>
                     {
-                        games.map((game, index) => (
-                            <tr key={game.id}>
-                                <td>{game.name}</td>
-                                <td>
-                                    <button onClick={() => this.joinGame(game.id)}>Join</button>
-                                </td>
-                            </tr>
-                        ))
+                        games.length > 0 ?
+                            games.map((game, index) => (
+                                <tr key={game.id}>
+                                    <td>{game.name}</td>
+                                    <td>
+                                        <button onClick={() => this.joinGame(game.id)}>Join</button>
+                                    </td>
+                                </tr>
+                            ))
+                            :
+                            <tr>There is 0 active games. Please create a new one!</tr>
                     }
                     <tr>
                         <td><input type="text" value={this.state.gameName} onChange={this.handleChange}/></td>
