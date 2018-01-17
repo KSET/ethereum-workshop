@@ -3,6 +3,43 @@ export default [
         "constant": true,
         "inputs": [
             {
+                "name": "_gameId",
+                "type": "uint256"
+            },
+            {
+                "name": "_symbol",
+                "type": "uint8"
+            }
+        ],
+        "name": "getPlayerAddress",
+        "outputs": [
+            {
+                "name": "player",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getGamesCount",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
                 "name": "",
                 "type": "uint256"
             }
@@ -20,6 +57,20 @@ export default [
             {
                 "name": "turn",
                 "type": "uint8"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "ENTRY_FEE",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
             }
         ],
         "payable": false,
@@ -53,68 +104,9 @@ export default [
             }
         ],
         "name": "createGame",
-        "outputs": [
-            {
-                "name": "gameId",
-                "type": "uint256"
-            },
-            {
-                "name": "board",
-                "type": "uint8[9]"
-            },
-            {
-                "name": "turn",
-                "type": "uint8"
-            }
-        ],
+        "outputs": [],
         "payable": true,
         "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "_gameId",
-                "type": "uint256"
-            },
-            {
-                "name": "_symbol",
-                "type": "uint8"
-            }
-        ],
-        "name": "getPlayer",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "_gameId",
-                "type": "uint256"
-            },
-            {
-                "name": "position",
-                "type": "uint8"
-            }
-        ],
-        "name": "getBoardPosition",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint8"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -130,6 +122,33 @@ export default [
         "payable": true,
         "stateMutability": "payable",
         "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "name": "gameId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "name": "status",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "name": "turn",
+                "type": "uint8"
+            }
+        ],
+        "name": "GameCreated",
+        "type": "event"
     },
     {
         "anonymous": false,

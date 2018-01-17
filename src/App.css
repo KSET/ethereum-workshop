@@ -67,3 +67,7 @@ body {
 .tic-tac-toe .scoreboard .score.O {
   color: #FF1010;
 }
+
+.row {
+  padding: 5px;
+}

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Scoreboard } from "./Scoreboard";
 import { Board } from "./Board";
-import {createGame, joinGame, makeMove, subscribeToEvent} from "../web3";
+import {createGame, joinGame, makeMove, subscribeToEvent} from "../../web3";
 
 export class TicTacToe extends React.Component {
     constructor() {
