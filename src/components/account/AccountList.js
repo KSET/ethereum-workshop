@@ -29,12 +29,12 @@ export class AccountList extends React.Component {
 
         return (
             <div>
-                <Row>
+                <Row className="show-grid">
                     <Col>
                         <h3>Choose your account:</h3>
                     </Col>
                 </Row>
-                <Row>
+                <Row className="show-grid">
                     <Col>
                         {
                             accounts.length > 0 ?

@@ -1,5 +1,6 @@
 import React from 'react';
 import { setContract } from '../../web3';
+import { Button, Col, FormControl, Row } from 'react-bootstrap';
 
 export class Contract extends React.Component {
 
@@ -31,13 +32,28 @@ export class Contract extends React.Component {
     render() {
         return (
             <div>
-                <h3>Enter your contract address:</h3>
-                <input
-                    type="text"
-                    value={this.state.contractAddress}
-                    onChange={this.handleChange}
-                />
-                <input type="button" value="Next" onClick={this.submitContractAddress}/>
+                <Row className="show-grid">
+                    <Col>
+                        <h3>Enter your contract address:</h3>
+                    </Col>
+                </Row>
+                <Row className="show-grid">
+                    <Col>
+                        <FormControl
+                            type="text"
+                            value={this.state.contractAddress}
+                            placeholder="Enter text"
+                            onChange={this.handleChange}
+                        />
+                    </Col>
+                </Row>
+                <Row className="show-grid">
+                    <Col>
+                        <Button bsStyle="primary" bsSize="large" type="submit" onClick={this.submitContractAddress} block>
+                            Next
+                        </Button>
+                    </Col>
+                </Row>
             </div>
         );
     }
