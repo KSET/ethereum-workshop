@@ -1,5 +1,6 @@
 import React from 'react';
 import { createGame, listenOnGames } from '../../web3';
+import { Button, Col, FormControl, Row } from 'react-bootstrap';
 
 export class GameRoom extends React.Component {
 
@@ -22,10 +23,10 @@ export class GameRoom extends React.Component {
             return;
         }
         let that = this;
-        listenOnGames(web3.contract, function(game) {
-           let games = that.state.games;
-           games.push(game);
-           that.setState({games: games});
+        listenOnGames(web3.contract, function (game) {
+            let games = that.state.games;
+            games.push(game);
+            that.setState({games: games});
         });
     }
 
@@ -47,26 +48,48 @@ export class GameRoom extends React.Component {
     render() {
         const {games} = this.state;
         return (
-            <table>
-                <tbody>
-                    {
-                        games.map((game, index) => (
-                            <tr key={game.id}>
-                                <td>{game.name}</td>
-                                <td>
-                                    <button onClick={() => this.joinGame(game.id)}>Join</button>
-                                </td>
-                            </tr>
-                        ))
-                    }
-                    <tr>
-                        <td><input type="text" value={this.state.gameName} onChange={this.handleChange}/></td>
-                        <td>
-                            <button onClick={() => this.createNewGame(this.state.gameName)}>Create Game</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div>
+                <Row>
+                    <Col>
+                        <h3>Join game or create new!</h3>
+                    </Col>
+                </Row>
+                <Row className="show-grid">
+                    <Col md={8}>
+                        <h4><b>Game Name</b></h4>
+                    </Col>
+                    <Col md={4}>
+                    </Col>
+                </Row>
+                {
+                    games.map((game, index) => (
+                        <Row key={index} className="show-grid">
+                            <Col md={8}>{game.name}</Col>
+                            <Col md={4}>
+                                <Button block bsStyle="primary" onClick={() => this.joinGame(game.id)}>
+                                    Join
+                                </Button>
+                            </Col>
+                        </Row>
+                    ))
+                }
+                <Row className="show-grid">
+                    <Col md={8}>
+                        <FormControl
+                            type="text"
+                            value={this.state.gameName}
+                            placeholder="TicTac1..."
+                            onChange={this.handleChange}
+                        />
+                    </Col>
+                    <Col md={4}>
+                        <Button bsStyle="primary" block
+                                 onClick={() => this.createNewGame(this.state.gameName)}>
+                            Create Game
+                        </Button>
+                    </Col>
+                </Row>
+            </div>
         );
     }
 
