@@ -7,6 +7,7 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import { AccountList } from './components/account/AccountList';
 import { Contract } from './components/contract/Contract';
+import { GameRoom } from './components/room/GameRoom';
 
 const web3 = Web3Instance.web3;
 
@@ -25,6 +26,8 @@ ReactDOM.render(
         <App>
             <RouteWithProps exact path="/" component={AccountList} web3={web3}/>
             <RouteWithProps path="/contract" component={Contract} web3={web3}/>
+            <RouteWithProps path="/room" component={GameRoom} web3={web3}/>
+            <RouteWithProps path="/game" component={Contract} web3={web3}/>
         </App>
     </BrowserRouter>,
     document.getElementById('root')
