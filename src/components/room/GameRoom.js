@@ -37,6 +37,7 @@ export class GameRoom extends React.Component {
 
     joinGame = (id) => {
         console.log('Joining game with id:', id);
+        this.props.history.push(`/game/${id}`);
     };
 
     createNewGame = (name) => {

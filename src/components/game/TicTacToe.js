@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Scoreboard } from "./Scoreboard";
 import { Board } from "./Board";
-import {createGame, joinGame, makeMove, subscribeToEvent} from "../../web3";
+import {createGame, getPlayerSymbol, joinGame, makeMove, subscribeToEvent} from "../../web3";
 
 export class TicTacToe extends React.Component {
     constructor() {
@@ -11,7 +11,7 @@ export class TicTacToe extends React.Component {
 
         this.state = {
             grid_size: 3, // 3 x 3 is initial table size
-            playerMark: null,
+            playerSymbol: null,
             gameId: null,
         };
     }
@@ -22,10 +22,8 @@ export class TicTacToe extends React.Component {
      * Initialize the game
      */
     init() {
-        // TODO: Make user input for new game or join game
-        const { gameId, web3 } = this.props;
-        // Saves numbers of moves made
-        this.moves = 0;
+        const { web3 } = this.props;
+        const gameId = this.props.match.params['gameId'];
 
         this.setState({
             // Saves & Prints the scores of player 1 & 2
@@ -37,27 +35,17 @@ export class TicTacToe extends React.Component {
             data: {}
         });
 
-        if (!!gameId) {
-            createGame(web3, "Input game name");
-            this.setState({ playerMark: 'X'})
-        } else {
-            joinGame(web3, gameId);
-            this.setState({ playerMark: 'O'})
-        }
+        const playerSymbol = getPlayerSymbol(web3.contract, gameId);
+        this.setState({ playerSymbol });
 
-        this.subscribeToEvents();
+        subscribeToEvent(web3.contract, 'BoardState', this.updateBoard);
+        subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
     }
 
     updateBoard(event) {
 
     }
 
-    subscribeToEvents() {
-        const { contract } = this.props;
-
-        subscribeToEvent(contract, 'BoardState', this.updateBoard);
-        subscribeToEvent(contract, 'GameResult', this.announceWinner);
-    }
 
     announceWinner(event) {
         const mark = event.mark;
@@ -85,18 +73,14 @@ export class TicTacToe extends React.Component {
             return;
         }
 
-        // Increment the number of moves
-        this.moves++;
-
-
-        const { gameId, playerMark, data } = this.state;
+        const { gameId, playerSymbol, data } = this.state;
         makeMove(this.props.web3, gameId, (row_index + col_index) * 2);
 
         // Assign mark data to the data object
         /*this.setState({
             data: {
                 ...data,
-                [row_index + '' + col_index]: playerMark
+                [row_index + '' + col_index]: playerSymbol
             }
         });*/
     }

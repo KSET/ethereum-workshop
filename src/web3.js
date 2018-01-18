@@ -82,3 +82,14 @@ export function subscribeToEvent(contract, eventName, callback) {
         }
     );
 }
+
+export function getPlayerSymbol(contract, gameId) {
+    return contract.getPlayerSymbol(gameId, function (error, result) {
+        if (!error) {
+            console.log(result);
+            return result;
+        } else {
+            console.log("error while fetching player symbol", error);
+        }
+    });
+}
