@@ -56,7 +56,13 @@ export function joinGame(contract, gameId) {
 }
 
 export function makeMove(contract, gameId, position) {
-
+    contract.move(gameId, position, function (error, result) {
+        if (!error) {
+            console.log(result);
+        } else {
+            console.log("error while making a move: ", error);
+        }
+    });
 }
 
 
@@ -69,8 +75,8 @@ export function setContract(web3, contractAddress) {
     });
 }
 
-export function subscribeToEvent(contract, eventName, callback) {
-    contract[eventName]({}, {},
+export function subscribeToEvent(contract, eventName, callback, filter = {}) {
+    contract[eventName](filter, {},
         function(error, log) {
             console.log(error);
 

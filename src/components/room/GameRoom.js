@@ -9,15 +9,16 @@ export class GameRoom extends React.Component {
         super(props);
         this.state = {
             games: [],
-            gameName: ''
+            gameName: '',
         };
-        this.joinGame.bind(this);
-        this.createNewGame.bind(this);
-        this.handleChange.bind(this);
+
+        this.joinGame = this.joinGame.bind(this);
+        this.createNewGame = this.createNewGame.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     componentWillMount() {
-        const {web3} = this.props;
+        const { web3 } = this.props;
         console.log('contract', web3.contract);
         if (!web3.contract) {
             this.props.history.push('/contract');
@@ -28,7 +29,7 @@ export class GameRoom extends React.Component {
         listenOnGames(web3.contract, function(game) {
            let games = that.state.games;
            console.log("Found game:", game);
-           if(game.status === GameState.WAITING) {
+           if (game.status === GameState.WAITING) {
                games.push(game);
                that.setState({games: games});
            }

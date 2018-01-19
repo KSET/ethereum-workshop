@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Scoreboard } from "./Scoreboard";
 import { Board } from "./Board";
-import {createGame, getPlayerSymbol, joinGame, makeMove, subscribeToEvent} from "../../web3";
+import { getPlayerSymbol, makeMove, subscribeToEvent } from "../../web3";
 
 export class TicTacToe extends React.Component {
     constructor() {
@@ -10,9 +10,14 @@ export class TicTacToe extends React.Component {
         this.mark = this.mark.bind(this);
 
         this.state = {
-            grid_size: 3, // 3 x 3 is initial table size
+            grid_size: 3, // 3 x 3
             playerSymbol: null,
             gameId: null,
+            board: {},
+            score: {
+                X: 0,
+                O: 0
+            }
         };
     }
 
@@ -24,22 +29,13 @@ export class TicTacToe extends React.Component {
     init() {
         const { web3 } = this.props;
         const gameId = this.props.match.params['gameId'];
-
-        this.setState({
-            // Saves & Prints the scores of player 1 & 2
-            score: {
-                X: 0,
-                O: 0
-            },
-            // Contains data of current game..which column is marked by which player
-            data: {}
-        });
+        this.setState({ gameId });
 
         const playerSymbol = getPlayerSymbol(web3.contract, gameId);
         this.setState({ playerSymbol });
 
-        subscribeToEvent(web3.contract, 'BoardState', this.updateBoard);
-        subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
+        this.listenForBoardChanges();
+        // subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
     }
 
     updateBoard(event) {
@@ -64,23 +60,40 @@ export class TicTacToe extends React.Component {
     }
 
 
+    listenForBoardChanges() {
+        const { web3 } = this.props;
+        const { gameId } = this.props.match.params['gameId'];
+
+        subscribeToEvent(web3.contract, "BoardState", function (result) {
+            const board = result.board;
+            const turn = result.turn;
+
+            console.log(board);
+            console.log(turn);
+        }, {gameId: gameId});
+    }
+
+
+
     /*
      * Mark particular column
      */
     mark(row_index, col_index) {
         // Return If already marked
-        if (this.state.data[row_index + '' + col_index]) {
+        if (this.state.board[row_index + '' + col_index]) {
             return;
         }
 
-        const { gameId, playerSymbol, data } = this.state;
-        makeMove(this.props.web3, gameId, (row_index + col_index) * 2);
+        const { gameId, grid_size } = this.state;
+        const { web3 } = this.props;
 
-        // Assign mark data to the data object
+        makeMove(web3.contract, gameId, row_index * grid_size + col_index);
+
+        // Assume success and update view for user
         /*this.setState({
-            data: {
-                ...data,
-                [row_index + '' + col_index]: playerSymbol
+            board: {
+                ...this.state.board,
+                [row_index + '' + col_index]: this.state.playerSymbol
             }
         });*/
     }
@@ -99,7 +112,7 @@ export class TicTacToe extends React.Component {
             <div className="tic-tac-toe">
                 <Scoreboard score={this.state.score}/>
 
-                <Board data={this.state.data} mark={this.mark}/>
+                <Board data={this.state.board} mark={this.mark}/>
             </div>
 
         )
