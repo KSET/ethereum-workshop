@@ -25,22 +25,24 @@ export class GameRoom extends React.Component {
             return;
         }
         let that = this;
-        console.log("Starting to listen on incomming games");
+        console.log("Starting to listen on incoming games");
         listenOnGames(web3.contract, function(game) {
            let games = that.state.games;
            console.log("Found game:", game);
-           if (game.status === GameState.WAITING) {
-               games.push(game);
-               that.setState({games: games});
-           }
+           games.push(game);
+           that.setState({ games });
         });
     }
 
-    joinGame = (id) => {
+    joinGame = (game) => {
         const { web3 } = this.props;
 
-        joinGame(web3.contract, id).then(result =>
-            result ? this.props.history.push(`/game/${id}`) : alert("Error while joining existing game"));
+        if (game.status === GameState.WAITING) {
+            joinGame(web3.contract, game.id).then(result =>
+                result ? this.props.history.push(`/game/${game.id}`) : alert("Error while joining existing game"));
+        } else {
+            this.props.history.push(`/game/${game.id}`);
+        }
     };
 
     createNewGame = (name) => {
@@ -74,9 +76,14 @@ export class GameRoom extends React.Component {
                     games.length > 0 ?
                         games.map((game, index) => (
                             <Row key={index} className="show-grid">
-                                <Col md={8}>{game.name}</Col>
+                                <Col md={8}>
+                                    {game.name}
+                                    {game.status === GameState.WAITING ? " (Waiting for player)" : null}
+                                    {game.status === GameState.READY ? " (Playing)" : null}
+                                    {game.status === GameState.FINISHED ? " (Finished)" : null}
+                                </Col>
                                 <Col md={4}>
-                                    <Button block bsStyle="primary" onClick={() => this.joinGame(game.id)}>
+                                    <Button block bsStyle="primary" onClick={() => this.joinGame(game)}>
                                         Join
                                     </Button>
                                 </Col>
