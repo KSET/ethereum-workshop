@@ -52,7 +52,17 @@ export function createGame(contract, name) {
 }
 
 export function joinGame(contract, gameId) {
-
+    return new Promise((resolve, reject) =>
+        contract.joinGame(gameId, {value: contract.ENTRY_FEE}, function (error, result) {
+            if (!error) {
+                console.log(result);
+                resolve(true);
+            } else {
+                console.log("Error while joining game: ", gameId);
+                reject(false);
+            }
+        }
+    ))
 }
 
 export function makeMove(contract, gameId, position) {

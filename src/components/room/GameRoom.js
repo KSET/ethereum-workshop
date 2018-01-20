@@ -1,5 +1,5 @@
 import React from 'react';
-import { createGame, listenOnGames } from '../../web3';
+import {createGame, joinGame, listenOnGames} from '../../web3';
 import { Alert, Button, Col, FormControl, Row } from 'react-bootstrap';
 import { GameState } from '../../GameState';
 
@@ -37,12 +37,14 @@ export class GameRoom extends React.Component {
     }
 
     joinGame = (id) => {
-        console.log('Joining game with id:', id);
-        this.props.history.push(`/game/${id}`);
+        const { web3 } = this.props;
+
+        joinGame(web3.contract, id).then(result =>
+            result ? this.props.history.push(`/game/${id}`) : alert("Error while joining existing game"));
     };
 
     createNewGame = (name) => {
-        const {web3} = this.props;
+        const { web3 } = this.props;
         console.log('Creating game with name:', name);
         createGame(web3.contract, name);
         this.setState({gameName: ''});
