@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Scoreboard } from "./Scoreboard";
 import { Board } from "./Board";
-import { getPlayerSymbol, makeMove, subscribeToEvent } from "../../web3";
+import {getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
 
 export class TicTacToe extends React.Component {
     constructor() {
@@ -12,7 +12,6 @@ export class TicTacToe extends React.Component {
         this.state = {
             grid_size: 3, // 3 x 3
             playerSymbol: null,
-            gameId: null,
             board: {},
             score: {
                 X: 0,
@@ -28,8 +27,13 @@ export class TicTacToe extends React.Component {
      */
     init() {
         const { web3 } = this.props;
+        // Load previous contract if user is accessing the game directly with URL
+        if (web3 && !web3.contract) {
+            setContract(web3, sessionStorage.getItem('contract'));
+            return;
+        }
+
         const gameId = this.props.match.params['gameId'];
-        this.setState({ gameId });
 
         const playerSymbol = getPlayerSymbol(web3.contract, gameId);
         this.setState({ playerSymbol });
@@ -68,6 +72,7 @@ export class TicTacToe extends React.Component {
             const board = result.board;
             const turn = result.turn;
 
+            console.log("Getting board state,,");
             console.log(board);
             console.log(turn);
         }, {gameId: gameId});
@@ -84,8 +89,9 @@ export class TicTacToe extends React.Component {
             return;
         }
 
-        const { gameId, grid_size } = this.state;
+        const { grid_size } = this.state;
         const { web3 } = this.props;
+        const { gameId } = this.props.match.params;
 
         makeMove(web3.contract, gameId, row_index * grid_size + col_index);
 

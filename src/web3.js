@@ -83,6 +83,8 @@ export function setContract(web3, contractAddress) {
     web3.contract.ENTRY_FEE(function (error, result) {
         web3.contract.ENTRY_FEE = result.toNumber();
     });
+
+    sessionStorage.setItem('contract', contractAddress);
 }
 
 export function subscribeToEvent(contract, eventName, callback, filter = {}) {
