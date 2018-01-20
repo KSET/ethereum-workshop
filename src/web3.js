@@ -101,6 +101,19 @@ export function subscribeToEvent(contract, eventName, callback, filter = {}) {
     );
 }
 
+export function getPastBoardEvents(contract, gameId) {
+    return new Promise((resolve, reject) => {
+        const event = contract.BoardState({gameId: gameId}, {fromBlock: 0, toBlock: 'latest'});
+        event.get(function(error, logs) {
+            if (!error) {
+                resolve(logs);
+            } else {
+                reject(error);
+            }
+        });
+    })
+}
+
 export function getPlayerSymbol(contract, gameId) {
     return contract.getPlayerSymbol(gameId, function (error, result) {
         if (!error) {

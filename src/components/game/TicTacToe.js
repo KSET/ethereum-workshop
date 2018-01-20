@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Scoreboard } from "./Scoreboard";
 import { Board } from "./Board";
-import {getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
+import {getPastBoardEvents, getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
 
 export class TicTacToe extends React.Component {
     constructor() {
@@ -30,7 +30,6 @@ export class TicTacToe extends React.Component {
         // Load previous contract if user is accessing the game directly with URL
         if (web3 && !web3.contract) {
             setContract(web3, sessionStorage.getItem('contract'));
-            return;
         }
 
         const gameId = this.props.match.params['gameId'];
@@ -38,6 +37,7 @@ export class TicTacToe extends React.Component {
         const playerSymbol = getPlayerSymbol(web3.contract, gameId);
         this.setState({ playerSymbol });
 
+        this.loadCurrentBoardState();
         this.listenForBoardChanges();
         // subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
     }
@@ -66,16 +66,33 @@ export class TicTacToe extends React.Component {
 
     listenForBoardChanges() {
         const { web3 } = this.props;
-        const { gameId } = this.props.match.params['gameId'];
+        const { gameId } = this.props.match.params;
 
         subscribeToEvent(web3.contract, "BoardState", function (result) {
             const board = result.board;
-            const turn = result.turn;
+            // const turn = result.turn;
 
             console.log("Getting board state,,");
-            console.log(board);
-            console.log(turn);
+            board.forEach(position => console.log(position));
         }, {gameId: gameId});
+    }
+
+
+    loadCurrentBoardState() {
+        const { gameId } = this.props.match.params;
+        const { web3 } = this.props;
+        console.log("Loading current board state....");
+
+        getPastBoardEvents(web3.contract, gameId).then(result => {
+            result.forEach(event => {
+                console.log(event.args.gameId.toNumber());
+                
+                const board = event.args.board;
+                board.forEach(position => {
+
+                })
+            })
+        });
     }
 
 
