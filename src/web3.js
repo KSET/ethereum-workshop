@@ -56,7 +56,6 @@ export function joinGame(contract, gameId) {
     return new Promise((resolve, reject) =>
         contract.joinGame(gameId, {value: contract.ENTRY_FEE}, function (error, result) {
             if (!error) {
-                console.log(result);
                 resolve(true);
             } else {
                 console.log("Error while joining game: ", gameId);
@@ -67,10 +66,8 @@ export function joinGame(contract, gameId) {
 }
 
 export function makeMove(contract, gameId, position) {
-    contract.move(gameId, position, function (error, result) {
-        if (!error) {
-            console.log(result);
-        } else {
+    contract.move(gameId, position, function (error) {
+        if (error) {
             console.log("error while making a move: ", error);
         }
     });
@@ -84,16 +81,11 @@ export function setContract(web3, contractAddress) {
     web3.contract.ENTRY_FEE(function (error, result) {
         web3.contract.ENTRY_FEE = result.toNumber();
     });
-
-    sessionStorage.setItem('contract', contractAddress);
 }
 
 export function subscribeToEvent(contract, eventName, callback, filter = {}) {
     contract[eventName](filter, {},
         function(error, log) {
-            console.log(error);
-
-
             if (!error) {
                 console.log(eventName, log);
                 callback(log.args);
@@ -102,9 +94,9 @@ export function subscribeToEvent(contract, eventName, callback, filter = {}) {
     );
 }
 
-export function getPastBoardEvents(contract, gameId) {
+export function getPastEvents(contract, eventName, gameId) {
     return new Promise((resolve, reject) => {
-        const event = contract.BoardState({gameId: gameId}, {fromBlock: 0, toBlock: 'latest'});
+        const event = contract[eventName]({gameId: gameId}, {fromBlock: 0, toBlock: 'latest'});
         event.get(function(error, logs) {
             if (!error) {
                 resolve(logs);
@@ -115,13 +107,27 @@ export function getPastBoardEvents(contract, gameId) {
     })
 }
 
+export function getCurrentBoard(contract, gameId) {
+    return new Promise((resolve, reject) => {
+        contract.getBoard(gameId, function(error, logs) {
+            if (!error) {
+                resolve(logs);
+            } else {
+                reject(error);
+            }
+        });
+    })
+}
+
 export function getPlayerSymbol(contract, gameId) {
-    return contract.getPlayerSymbol(gameId, function (error, result) {
-        if (!error) {
-            console.log(result);
-            return result;
-        } else {
-            console.log("error while fetching player symbol", error);
+    return new Promise((resolve, reject) =>
+        contract.getPlayerSymbol(gameId, function (error, result) {
+            if (!error) {
+                resolve(result);
+            } else {
+                console.log("error while fetching player symbol", error);
+                reject(error);
+            }
         }
-    });
+    ));
 }
