@@ -1,5 +1,5 @@
 import React from 'react';
-import {createGame, joinGame, listenOnGames} from '../../web3';
+import { createGame, joinGame, listenOnGames } from '../../web3';
 import { Alert, Button, Col, FormControl, Row } from 'react-bootstrap';
 import { GameState } from '../../GameState';
 
@@ -18,37 +18,40 @@ export class GameRoom extends React.Component {
     }
 
     componentWillMount() {
-        const { web3 } = this.props;
+        const {web3, stopLoading} = this.props;
         console.log('contract', web3.contract);
         if (!web3.contract) {
             this.props.history.push('/contract');
             return;
         }
         let that = this;
-        console.log("Starting to listen on incoming games");
-        listenOnGames(web3.contract, function(game) {
-           let games = that.state.games;
-           console.log("Found game:", game);
-           games.push(game);
-           that.setState({ games });
+        console.log('Starting to listen on incoming games');
+        listenOnGames(web3.contract, function (game) {
+            stopLoading();
+            let games = that.state.games;
+            console.log('Found game:', game);
+            games.push(game);
+            that.setState({games});
         });
     }
 
     joinGame = (game) => {
-        const { web3 } = this.props;
+        const {web3, startLoading} = this.props;
 
         if (game.status === GameState.WAITING) {
             joinGame(web3.contract, game.id).then(result =>
-                result ? this.props.history.push(`/game/${game.id}`) : alert("Error while joining existing game"));
+                result ? this.props.history.push(`/game/${game.id}`) : alert('Error while joining existing game'));
+            startLoading();
         } else {
             this.props.history.push(`/game/${game.id}`);
         }
     };
 
     createNewGame = (name) => {
-        const { web3 } = this.props;
+        const {web3, startLoading} = this.props;
         console.log('Creating game with name:', name);
         createGame(web3.contract, name);
+        startLoading();
         this.setState({gameName: ''});
     };
 
@@ -78,9 +81,9 @@ export class GameRoom extends React.Component {
                             <Row key={index} className="show-grid">
                                 <Col md={8}>
                                     {game.name}
-                                    {game.status === GameState.WAITING ? " (Waiting for player)" : null}
-                                    {game.status === GameState.READY ? " (Playing)" : null}
-                                    {game.status === GameState.FINISHED ? " (Finished)" : null}
+                                    {game.status === GameState.WAITING ? ' (Waiting for player)' : null}
+                                    {game.status === GameState.READY ? ' (Playing)' : null}
+                                    {game.status === GameState.FINISHED ? ' (Finished)' : null}
                                 </Col>
                                 <Col md={4}>
                                     <Button block bsStyle="primary" onClick={() => this.joinGame(game)}>
@@ -107,7 +110,7 @@ export class GameRoom extends React.Component {
                     </Col>
                     <Col md={4}>
                         <Button bsStyle="primary" block
-                                 onClick={() => this.createNewGame(this.state.gameName)}>
+                                onClick={() => this.createNewGame(this.state.gameName)}>
                             Create Game
                         </Button>
                     </Col>
