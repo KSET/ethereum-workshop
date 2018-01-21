@@ -171,8 +171,8 @@ export default [
             },
             {
                 "indexed": false,
-                "name": "board",
-                "type": "uint8[9]"
+                "name": "name",
+                "type": "string"
             },
             {
                 "indexed": false,
