@@ -93,9 +93,9 @@ export function subscribeToEvent(contract, eventName, callback, filter = {}) {
     );
 }
 
-export function getPastBoardEvents(contract, gameId) {
+export function getPastEvents(contract, eventName, gameId) {
     return new Promise((resolve, reject) => {
-        const event = contract.BoardState({gameId: gameId}, {fromBlock: 0, toBlock: 'latest'});
+        const event = contract[eventName]({gameId: gameId}, {fromBlock: 0, toBlock: 'latest'});
         event.get(function(error, logs) {
             if (!error) {
                 resolve(logs);

@@ -2,14 +2,12 @@ import React from 'react';
 
 import { Scoreboard } from "./Scoreboard";
 import { Board } from "./Board";
-import {getPastBoardEvents, getCurrentBoard, getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
+import {getPastEvents, getCurrentBoard, getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
 
 export class TicTacToe extends React.Component {
     constructor() {
         super();
         this.mark = this.mark.bind(this);
-        this.subscribeToEvent = subscribeToEvent.bind(this);
-        this.updateBoard = this.updateBoard.bind(this);
 
         this.state = {
             grid_size: 3, // 3 x 3
@@ -40,23 +38,19 @@ export class TicTacToe extends React.Component {
         getPlayerSymbol(web3.contract, gameId).then(playerSymbol => {
             this.setState({ playerSymbol });
 
+            this.checkIfGameFinished();
             this.loadCurrentBoardState();
             this.listenForBoardChanges();
         });
-        // subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
+
+        subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
     }
 
     announceWinner(event) {
-        const mark = event.mark;
+        const winner = event.args ? event.args.winner : event.winner;
 
-        if (!!mark) {
-            alert(mark + " has won");
-            this.setState({
-                score: {
-                    ...this.state.score,
-                    [mark]: this.state.score[mark] + 1
-                }
-            });
+        if (winner) {
+            alert(winner + " has won");
         } else {
             alert("It's a draw !");
         }
@@ -66,11 +60,9 @@ export class TicTacToe extends React.Component {
         const { grid_size } = this.state;
         const newBoard = {};
 
-        console.log(board);
-
         for (let index = 0; index < board.length; index++) {
             const mark = board[index].toNumber();
-            console.log("Symbol: ", mark, " on board index", index);
+
             if (mark !== 0) {
                 // Field has been played - contains symbol
                 console.log("Mark ", this.playerSymbolConst(mark), " played on position ", index);
@@ -88,8 +80,6 @@ export class TicTacToe extends React.Component {
 
         let that = this;
         subscribeToEvent(web3.contract, "BoardState", function (result) {
-            // const turn = result.turn;
-
             console.log("Updating board state...", result);
             that.updateBoard(result.board);
         }, {gameId: gameId});
@@ -104,14 +94,24 @@ export class TicTacToe extends React.Component {
 
         getCurrentBoard(web3.contract, gameId).then(result => this.updateBoard(result));
 
-        /*getPastBoardEvents(web3.contract, gameId).then(result => {
+        /*getPastEvents(web3.contract, 'BoardState', gameId).then(result => {
             if (result.length > 0) {
                 result.forEach(event => this.updateBoard(event));
             }
         });*/
     }
 
+    checkIfGameFinished() {
+        const { gameId } = this.props.match.params;
+        const { web3 } = this.props;
 
+        let that = this;
+        getPastEvents(web3.contract, 'GameResult', gameId).then(result => {
+           if (result.length > 0) {
+               that.announceWinner(result[0]);
+           }
+        });
+    }
 
     /*
      * Mark particular column
