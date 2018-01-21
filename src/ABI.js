@@ -3,43 +3,6 @@ export default [
         "constant": true,
         "inputs": [
             {
-                "name": "_gameId",
-                "type": "uint256"
-            },
-            {
-                "name": "_symbol",
-                "type": "uint8"
-            }
-        ],
-        "name": "getPlayerAddress",
-        "outputs": [
-            {
-                "name": "player",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "getGamesCount",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
                 "name": "",
                 "type": "uint256"
             }
@@ -66,10 +29,10 @@ export default [
     {
         "constant": true,
         "inputs": [],
-        "name": "ENTRY_FEE",
+        "name": "getGamesCount",
         "outputs": [
             {
-                "name": "",
+                "name": "count",
                 "type": "uint256"
             }
         ],
@@ -110,6 +73,67 @@ export default [
         "type": "function"
     },
     {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_gameId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getBoard",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint8[9]"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_gameId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getPlayerSymbol",
+        "outputs": [
+            {
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_gameId",
+                "type": "uint256"
+            },
+            {
+                "name": "_symbol",
+                "type": "uint8"
+            }
+        ],
+        "name": "getPlayerAddress",
+        "outputs": [
+            {
+                "name": "player",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "constant": false,
         "inputs": [
             {
@@ -124,22 +148,31 @@ export default [
         "type": "function"
     },
     {
+        "constant": true,
+        "inputs": [],
+        "name": "ENTRY_FEE",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "name": "gameId",
                 "type": "uint256"
             },
             {
                 "indexed": false,
-                "name": "name",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "name": "status",
-                "type": "uint8"
+                "name": "board",
+                "type": "uint8[9]"
             },
             {
                 "indexed": false,
@@ -154,7 +187,7 @@ export default [
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "name": "gameId",
                 "type": "uint256"
             },
@@ -176,7 +209,7 @@ export default [
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "name": "gameId",
                 "type": "uint256"
             },
@@ -189,4 +222,4 @@ export default [
         "name": "GameResult",
         "type": "event"
     }
-];
+]

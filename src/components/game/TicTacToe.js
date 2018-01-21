@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Scoreboard } from "./Scoreboard";
 import { Board } from "./Board";
-import {createGame, joinGame, makeMove, subscribeToEvent} from "../../web3";
+import {getPastEvents, getCurrentBoard, getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
 
 export class TicTacToe extends React.Component {
     constructor() {
@@ -10,93 +10,131 @@ export class TicTacToe extends React.Component {
         this.mark = this.mark.bind(this);
 
         this.state = {
-            grid_size: 3, // 3 x 3 is initial table size
-            playerMark: null,
-            gameId: null,
+            grid_size: 3, // 3 x 3
+            playerSymbol: null,
+            board: {},
+            score: {
+                X: 0,
+                O: 0
+            }
         };
     }
 
-
+    playerSymbolConst = (number) => (number === 1 ? 'X' : 'O');
 
     /*
      * Initialize the game
      */
     init() {
-        // TODO: Make user input for new game or join game
-        const { gameId, web3 } = this.props;
-        // Saves numbers of moves made
-        this.moves = 0;
-
-        this.setState({
-            // Saves & Prints the scores of player 1 & 2
-            score: {
-                X: 0,
-                O: 0
-            },
-            // Contains data of current game..which column is marked by which player
-            data: {}
-        });
-
-        if (!!gameId) {
-            createGame(web3, "Input game name");
-            this.setState({ playerMark: 'X'})
-        } else {
-            joinGame(web3, gameId);
-            this.setState({ playerMark: 'O'})
+        const { web3 } = this.props;
+        // Load previous contract if user is accessing the game directly with URL
+        if (web3 && !web3.contract) {
+            setContract(web3, localStorage.getItem('contractAddress'));
+            web3.eth.defaultAccount = sessionStorage.getItem('account');
         }
 
-        this.subscribeToEvents();
-    }
+        const gameId = this.props.match.params['gameId'];
 
-    updateBoard(event) {
+        getPlayerSymbol(web3.contract, gameId).then(playerSymbol => {
+            this.setState({ playerSymbol });
 
-    }
+            this.checkIfGameFinished();
+            this.loadCurrentBoardState();
+            this.listenForBoardChanges();
+        });
 
-    subscribeToEvents() {
-        const { contract } = this.props;
-
-        subscribeToEvent(contract, 'BoardState', this.updateBoard);
-        subscribeToEvent(contract, 'GameResult', this.announceWinner);
+        subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
     }
 
     announceWinner(event) {
-        const mark = event.mark;
+        const winner = event.args ? event.args.winner : event.winner;
 
-        if (!!mark) {
-            alert(mark + " has won");
-            this.setState({
-                score: {
-                    ...this.state.score,
-                    [mark]: this.state.score[mark] + 1
-                }
-            });
+        if (winner) {
+            alert(winner + " has won");
         } else {
             alert("It's a draw !");
         }
     }
 
+    updateBoard(board) {
+        const { grid_size } = this.state;
+        const newBoard = {};
+
+        for (let index = 0; index < board.length; index++) {
+            const mark = board[index].toNumber();
+
+            if (mark !== 0) {
+                // Field has been played - contains symbol
+                console.log("Mark ", this.playerSymbolConst(mark), " played on position ", index);
+                newBoard[Math.floor(index / grid_size) + '' + index % grid_size] = this.playerSymbolConst(mark);
+            }
+        }
+
+        this.setState({board: newBoard});
+    }
+
+
+    listenForBoardChanges() {
+        const { web3 } = this.props;
+        const { gameId } = this.props.match.params;
+
+        let that = this;
+        subscribeToEvent(web3.contract, "BoardState", function (result) {
+            console.log("Updating board state...", result);
+            that.updateBoard(result.board);
+        }, {gameId: gameId});
+    }
+
+
+    loadCurrentBoardState() {
+        const { gameId } = this.props.match.params;
+        const { web3 } = this.props;
+
+        console.log("Loading current board state....");
+
+        getCurrentBoard(web3.contract, gameId).then(result => this.updateBoard(result));
+
+        /*getPastEvents(web3.contract, 'BoardState', gameId).then(result => {
+            if (result.length > 0) {
+                result.forEach(event => this.updateBoard(event));
+            }
+        });*/
+    }
+
+    checkIfGameFinished() {
+        const { gameId } = this.props.match.params;
+        const { web3 } = this.props;
+
+        let that = this;
+        getPastEvents(web3.contract, 'GameResult', gameId).then(result => {
+           if (result.length > 0) {
+               that.announceWinner(result[0]);
+           }
+        });
+    }
 
     /*
      * Mark particular column
      */
     mark(row_index, col_index) {
         // Return If already marked
-        if (this.state.data[row_index + '' + col_index]) {
+        if (this.state.board[row_index + '' + col_index]) {
             return;
         }
 
-        // Increment the number of moves
-        this.moves++;
+        const { grid_size } = this.state;
+        const { web3 } = this.props;
+        const { gameId } = this.props.match.params;
 
+        const position = row_index * grid_size + col_index;
+        console.log("Making move on position ", position, " for gameId ", gameId);
+        makeMove(web3.contract, gameId, position);
 
-        const { gameId, playerMark, data } = this.state;
-        makeMove(this.props.web3, gameId, (row_index + col_index) * 2);
-
-        // Assign mark data to the data object
+        // Assume success and update view for user
         /*this.setState({
-            data: {
-                ...data,
-                [row_index + '' + col_index]: playerMark
+            board: {
+                ...this.state.board,
+                [row_index + '' + col_index]: this.state.playerSymbol
             }
         });*/
     }
@@ -115,7 +153,7 @@ export class TicTacToe extends React.Component {
             <div className="tic-tac-toe">
                 <Scoreboard score={this.state.score}/>
 
-                <Board data={this.state.data} mark={this.mark}/>
+                <Board data={this.state.board} mark={this.mark}/>
             </div>
 
         )
