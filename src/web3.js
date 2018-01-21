@@ -83,16 +83,11 @@ export function setContract(web3, contractAddress) {
     web3.contract.ENTRY_FEE(function (error, result) {
         web3.contract.ENTRY_FEE = result.toNumber();
     });
-
-    sessionStorage.setItem('contract', contractAddress);
 }
 
 export function subscribeToEvent(contract, eventName, callback, filter = {}) {
     contract[eventName](filter, {},
         function(error, log) {
-            console.log(error);
-
-
             if (!error) {
                 console.log(eventName, log);
                 callback(log.args);
@@ -115,12 +110,14 @@ export function getPastBoardEvents(contract, gameId) {
 }
 
 export function getPlayerSymbol(contract, gameId) {
-    return contract.getPlayerSymbol(gameId, function (error, result) {
-        if (!error) {
-            console.log(result);
-            return result;
-        } else {
-            console.log("error while fetching player symbol", error);
+    return new Promise((resolve, reject) =>
+        contract.getPlayerSymbol(gameId, function (error, result) {
+            if (!error) {
+                resolve(result);
+            } else {
+                console.log("error while fetching player symbol", error);
+                reject(error);
+            }
         }
-    });
+    ));
 }

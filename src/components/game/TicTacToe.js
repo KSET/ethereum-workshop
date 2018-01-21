@@ -20,7 +20,7 @@ export class TicTacToe extends React.Component {
         };
     }
 
-
+    playerSymbolConst = (number) => (number === 1 ? 'X' : 'O');
 
     /*
      * Initialize the game
@@ -29,16 +29,18 @@ export class TicTacToe extends React.Component {
         const { web3 } = this.props;
         // Load previous contract if user is accessing the game directly with URL
         if (web3 && !web3.contract) {
-            setContract(web3, sessionStorage.getItem('contract'));
+            setContract(web3, localStorage.getItem('contractAddress'));
+            web3.eth.defaultAccount = localStorage.getItem('account');
         }
 
         const gameId = this.props.match.params['gameId'];
 
-        const playerSymbol = getPlayerSymbol(web3.contract, gameId);
-        this.setState({ playerSymbol });
+        getPlayerSymbol(web3.contract, gameId).then(playerSymbol => {
+            this.setState({ playerSymbol });
 
-        this.loadCurrentBoardState();
-        this.listenForBoardChanges();
+            this.loadCurrentBoardState();
+            this.listenForBoardChanges();
+        });
         // subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
     }
 
@@ -81,17 +83,24 @@ export class TicTacToe extends React.Component {
     loadCurrentBoardState() {
         const { gameId } = this.props.match.params;
         const { web3 } = this.props;
+        const { grid_size, playerSymbol } = this.state;
+
         console.log("Loading current board state....");
 
         getPastBoardEvents(web3.contract, gameId).then(result => {
+            const board = {};
             result.forEach(event => {
-                console.log(event.args.gameId.toNumber());
-                
-                const board = event.args.board;
-                board.forEach(position => {
+                const eventBoard = event.args.board;
+                eventBoard.forEach((position, index) => {
+                    const i = position.toNumber();
+                    if (i !== 0) {
+                        board[index % grid_size + '' + Math.floor(index / grid_size)] = this.playerSymbolConst(i);
+                    }
+                });
 
-                })
-            })
+                console.log(board);
+            });
+            this.setState({board});
         });
     }
 
