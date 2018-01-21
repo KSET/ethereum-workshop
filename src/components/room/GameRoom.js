@@ -1,5 +1,5 @@
 import React from 'react';
-import { createGame, joinGame, listenOnGames } from '../../web3';
+import { createGame, getPlayerSymbol, joinGame, listenOnGames } from '../../web3';
 import { Alert, Button, Col, FormControl, Row } from 'react-bootstrap';
 import { GameState } from '../../GameState';
 
@@ -29,10 +29,24 @@ export class GameRoom extends React.Component {
         listenOnGames(web3.contract, function (game) {
             stopLoading();
             let games = that.state.games;
-            console.log('Found game:', game);
-            games.push(game);
-            that.setState({games});
+            getPlayerSymbol(web3.contract, game.id).then(result => {
+                    if(result === 'X' || result === 'O') {
+                        that.props.history.push(`/game/${game.id}`);
+                    }
+            });
+            if(!that.gameExists(games, game.id)) {
+                console.log('Found game:', game);
+                games.push(game);
+                that.setState({games});
+                stopLoading();
+            }
+        }, function() {
+            stopLoading();
         });
+    }
+
+    gameExists(games, gameId) {
+        return games.filter(game => game.id === gameId).length > 0;
     }
 
     joinGame = (game) => {
@@ -48,9 +62,11 @@ export class GameRoom extends React.Component {
     };
 
     createNewGame = (name) => {
-        const {web3, startLoading} = this.props;
+        const {web3, startLoading, stopLoading} = this.props;
         console.log('Creating game with name:', name);
-        createGame(web3.contract, name);
+        createGame(web3.contract, name).then(function(result){}, function(error) {
+            stopLoading();
+        });
         startLoading();
         this.setState({gameName: ''});
     };
@@ -86,9 +102,12 @@ export class GameRoom extends React.Component {
                                     {game.status === GameState.FINISHED ? ' (Finished)' : null}
                                 </Col>
                                 <Col md={4}>
-                                    <Button block bsStyle="primary" onClick={() => this.joinGame(game)}>
-                                        Join
-                                    </Button>
+                                    {
+                                        game.status === GameState.WAITING ?
+                                        <Button block bsStyle="primary" onClick={() => this.joinGame(game)}>
+                                            Join
+                                        </Button> : ''
+                                    }
                                 </Col>
                             </Row>
                         ))

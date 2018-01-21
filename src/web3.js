@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-import abi from "./ABI";
+import abi from './ABI';
 import { GameState } from './GameState';
 
 class Web3Instance {
@@ -8,7 +8,7 @@ class Web3Instance {
             this.web3 = new Web3(window.web3.currentProvider);
         } else {
             this.web3 = null;
-            alert("MetaMask is not running!");
+            alert('MetaMask is not running!');
         }
     }
 }
@@ -22,60 +22,66 @@ export function listenOnGames(contract, addGameCallback) {
             contract.games(i, function (error, result) {
                 if (!error) {
                     addGameCallback({
-                       id: i,
-                       name: result[0],
-                       status: result[1].toNumber(),
-                       turn: result[2].toNumber()
+                        id: i,
+                        name: result[0],
+                        status: result[1].toNumber(),
+                        turn: result[2].toNumber()
                     });
                 } else {
-                    console.log("error while fetching game with id:", i, error);
+                    console.log('error while fetching game with id:', i, error);
                 }
             })
         }
     });
-    subscribeToEvent(contract, "GameCreated", function (result) {
-       addGameCallback({
-           id: result.gameId.toNumber(),
-           name: result.name,
-           status: GameState.WAITING,
-           turn: result.turn.toNumber()
-       })
+    subscribeToEvent(contract, 'GameCreated', function (result) {
+        console.log('Received GameCreated event', result);
+        addGameCallback({
+            id: result.gameId.toNumber(),
+            name: result.name,
+            status: GameState.WAITING,
+            turn: result.turn.toNumber()
+        })
     });
 }
 
-export function createGame(contract, name) {
-    contract.createGame(name, {value: contract.ENTRY_FEE}, function(error, result) {
-        if (!error) {
-            console.log("Contract transaction send: TransactionHash: "
-                + result + " waiting to be mined...");
-        }
-    });
+export function createGame(contract, name, errorCallback) {
+    return new Promise((resolve, reject) =>
+        contract.createGame(name, {value: contract.ENTRY_FEE}, function (error, result) {
+                if (!error) {
+                    console.log('Contract transaction send: TransactionHash: '
+                        + result + ' waiting to be mined...');
+                    resolve(result);
+                } else {
+                    reject(error);
+                }
+            }
+        ));
 }
 
 export function joinGame(contract, gameId) {
     return new Promise((resolve, reject) =>
         contract.joinGame(gameId, {value: contract.ENTRY_FEE}, function (error, result) {
-            if (!error) {
-                resolve(true);
-            } else {
-                console.log("Error while joining game: ", gameId);
-                reject(false);
+                if (!error) {
+                    resolve(true);
+                } else {
+                    console.log('Error while joining game: ', gameId);
+                    reject(false);
+                }
             }
-        }
-    ))
+        ))
 }
 
 export function makeMove(contract, gameId, position) {
     contract.move(gameId, position, function (error) {
         if (error) {
-            console.log("error while making a move: ", error);
+            console.log('error while making a move: ', error);
         }
     });
 }
 
 
 export function setContract(web3, contractAddress) {
-    console.log("Setting contract on address:", contractAddress);
+    console.log('Setting contract on address:', contractAddress);
     const Contract = web3.eth.contract(abi);
     web3.contract = Contract.at(contractAddress);
     web3.contract.ENTRY_FEE(function (error, result) {
@@ -85,7 +91,7 @@ export function setContract(web3, contractAddress) {
 
 export function subscribeToEvent(contract, eventName, callback, filter = {}) {
     contract[eventName](filter, {},
-        function(error, log) {
+        function (error, log) {
             if (!error) {
                 console.log(eventName, log);
                 callback(log.args);
@@ -97,7 +103,7 @@ export function subscribeToEvent(contract, eventName, callback, filter = {}) {
 export function getPastEvents(contract, eventName, gameId) {
     return new Promise((resolve, reject) => {
         const event = contract[eventName]({gameId: gameId}, {fromBlock: 0, toBlock: 'latest'});
-        event.get(function(error, logs) {
+        event.get(function (error, logs) {
             if (!error) {
                 resolve(logs);
             } else {
@@ -109,7 +115,7 @@ export function getPastEvents(contract, eventName, gameId) {
 
 export function getCurrentBoard(contract, gameId) {
     return new Promise((resolve, reject) => {
-        contract.getBoard(gameId, function(error, logs) {
+        contract.getBoard(gameId, function (error, logs) {
             if (!error) {
                 resolve(logs);
             } else {
@@ -122,12 +128,12 @@ export function getCurrentBoard(contract, gameId) {
 export function getPlayerSymbol(contract, gameId) {
     return new Promise((resolve, reject) =>
         contract.getPlayerSymbol(gameId, function (error, result) {
-            if (!error) {
-                resolve(result);
-            } else {
-                console.log("error while fetching player symbol", error);
-                reject(error);
+                if (!error) {
+                    resolve(result);
+                } else {
+                    console.log('error while fetching player symbol', error);
+                    reject(error);
+                }
             }
-        }
-    ));
+        ));
 }
