@@ -1,5 +1,6 @@
 import Web3 from 'web3'
 import abi from "./ABI";
+import { GameState } from './GameState';
 
 class Web3Instance {
     constructor() {
@@ -36,7 +37,7 @@ export function listenOnGames(contract, addGameCallback) {
        addGameCallback({
            id: result.gameId.toNumber(),
            name: result.name,
-           status: result.status.toNumber(),
+           status: GameState.WAITING,
            turn: result.turn.toNumber()
        })
     });
