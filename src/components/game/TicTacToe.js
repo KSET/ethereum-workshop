@@ -26,7 +26,8 @@ export class TicTacToe extends React.Component {
      * Initialize the game
      */
     init() {
-        const { web3 } = this.props;
+        const { web3, stopLoading } = this.props;
+        stopLoading();
         // Load previous contract if user is accessing the game directly with URL
         if (web3 && !web3.contract) {
             setContract(web3, localStorage.getItem('contractAddress'));
@@ -36,6 +37,7 @@ export class TicTacToe extends React.Component {
         const gameId = this.props.match.params['gameId'];
 
         getPlayerSymbol(web3.contract, gameId).then(playerSymbol => {
+            console.log(playerSymbol);
             this.setState({ playerSymbol });
 
             this.checkIfGameFinished();
@@ -103,11 +105,12 @@ export class TicTacToe extends React.Component {
 
     checkIfGameFinished() {
         const { gameId } = this.props.match.params;
-        const { web3 } = this.props;
+        const { web3, stopLoading } = this.props;
 
         let that = this;
         getPastEvents(web3.contract, 'GameResult', gameId).then(result => {
            if (result.length > 0) {
+               stopLoading();
                that.announceWinner(result[0]);
            }
         });
@@ -117,6 +120,7 @@ export class TicTacToe extends React.Component {
      * Mark particular column
      */
     mark(row_index, col_index) {
+        const {startLoading} = this.props;
         // Return If already marked
         if (this.state.board[row_index + '' + col_index]) {
             return;
@@ -129,14 +133,7 @@ export class TicTacToe extends React.Component {
         const position = row_index * grid_size + col_index;
         console.log("Making move on position ", position, " for gameId ", gameId);
         makeMove(web3.contract, gameId, position);
-
-        // Assume success and update view for user
-        /*this.setState({
-            board: {
-                ...this.state.board,
-                [row_index + '' + col_index]: this.state.playerSymbol
-            }
-        });*/
+        startLoading();
     }
 
 
