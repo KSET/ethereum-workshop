@@ -2,12 +2,14 @@ import React from 'react';
 
 import { Scoreboard } from "./Scoreboard";
 import { Board } from "./Board";
-import {getPastBoardEvents, getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
+import {getPastBoardEvents, getCurrentBoard, getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
 
 export class TicTacToe extends React.Component {
     constructor() {
         super();
         this.mark = this.mark.bind(this);
+        this.subscribeToEvent = subscribeToEvent.bind(this);
+        this.updateBoard = this.updateBoard.bind(this);
 
         this.state = {
             grid_size: 3, // 3 x 3
@@ -30,7 +32,7 @@ export class TicTacToe extends React.Component {
         // Load previous contract if user is accessing the game directly with URL
         if (web3 && !web3.contract) {
             setContract(web3, localStorage.getItem('contractAddress'));
-            web3.eth.defaultAccount = localStorage.getItem('account');
+            web3.eth.defaultAccount = sessionStorage.getItem('account');
         }
 
         const gameId = this.props.match.params['gameId'];
@@ -43,11 +45,6 @@ export class TicTacToe extends React.Component {
         });
         // subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
     }
-
-    updateBoard(event) {
-
-    }
-
 
     announceWinner(event) {
         const mark = event.mark;
@@ -65,17 +62,36 @@ export class TicTacToe extends React.Component {
         }
     }
 
+    updateBoard(board) {
+        const { grid_size } = this.state;
+        const newBoard = {};
+
+        console.log(board);
+
+        for (let index = 0; index < board.length; index++) {
+            const mark = board[index].toNumber();
+            console.log("Symbol: ", mark, " on board index", index);
+            if (mark !== 0) {
+                // Field has been played - contains symbol
+                console.log("Mark ", this.playerSymbolConst(mark), " played on position ", index);
+                newBoard[Math.floor(index / grid_size) + '' + index % grid_size] = this.playerSymbolConst(mark);
+            }
+        }
+
+        this.setState({board: newBoard});
+    }
+
 
     listenForBoardChanges() {
         const { web3 } = this.props;
         const { gameId } = this.props.match.params;
 
+        let that = this;
         subscribeToEvent(web3.contract, "BoardState", function (result) {
-            const board = result.board;
             // const turn = result.turn;
 
-            console.log("Getting board state,,");
-            board.forEach(position => console.log(position));
+            console.log("Updating board state...", result);
+            that.updateBoard(result.board);
         }, {gameId: gameId});
     }
 
@@ -83,25 +99,16 @@ export class TicTacToe extends React.Component {
     loadCurrentBoardState() {
         const { gameId } = this.props.match.params;
         const { web3 } = this.props;
-        const { grid_size, playerSymbol } = this.state;
 
         console.log("Loading current board state....");
 
-        getPastBoardEvents(web3.contract, gameId).then(result => {
-            const board = {};
-            result.forEach(event => {
-                const eventBoard = event.args.board;
-                eventBoard.forEach((position, index) => {
-                    const i = position.toNumber();
-                    if (i !== 0) {
-                        board[index % grid_size + '' + Math.floor(index / grid_size)] = this.playerSymbolConst(i);
-                    }
-                });
+        getCurrentBoard(web3.contract, gameId).then(result => this.updateBoard(result));
 
-                console.log(board);
-            });
-            this.setState({board});
-        });
+        /*getPastBoardEvents(web3.contract, gameId).then(result => {
+            if (result.length > 0) {
+                result.forEach(event => this.updateBoard(event));
+            }
+        });*/
     }
 
 
@@ -119,7 +126,9 @@ export class TicTacToe extends React.Component {
         const { web3 } = this.props;
         const { gameId } = this.props.match.params;
 
-        makeMove(web3.contract, gameId, row_index * grid_size + col_index);
+        const position = row_index * grid_size + col_index;
+        console.log("Making move on position ", position, " for gameId ", gameId);
+        makeMove(web3.contract, gameId, position);
 
         // Assume success and update view for user
         /*this.setState({

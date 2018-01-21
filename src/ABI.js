@@ -28,6 +28,71 @@ export default [
     },
     {
         "constant": true,
+        "inputs": [],
+        "name": "getGamesCount",
+        "outputs": [
+            {
+                "name": "count",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_gameId",
+                "type": "uint256"
+            },
+            {
+                "name": "position",
+                "type": "uint8"
+            }
+        ],
+        "name": "move",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_name",
+                "type": "string"
+            }
+        ],
+        "name": "createGame",
+        "outputs": [],
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_gameId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getBoard",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint8[9]"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
         "inputs": [
             {
                 "name": "_gameId",
@@ -69,17 +134,17 @@ export default [
         "type": "function"
     },
     {
-        "constant": true,
-        "inputs": [],
-        "name": "getGamesCount",
-        "outputs": [
+        "constant": false,
+        "inputs": [
             {
-                "name": "count",
+                "name": "_gameId",
                 "type": "uint256"
             }
         ],
-        "payable": false,
-        "stateMutability": "view",
+        "name": "joinGame",
+        "outputs": [],
+        "payable": true,
+        "stateMutability": "payable",
         "type": "function"
     },
     {
@@ -100,61 +165,7 @@ export default [
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
-                "name": "gameId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "name": "board",
-                "type": "uint8[9]"
-            },
-            {
-                "indexed": false,
-                "name": "turn",
-                "type": "uint8"
-            }
-        ],
-        "name": "BoardState",
-        "type": "event"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_gameId",
-                "type": "uint256"
-            },
-            {
-                "name": "position",
-                "type": "uint8"
-            }
-        ],
-        "name": "move",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_gameId",
-                "type": "uint256"
-            }
-        ],
-        "name": "joinGame",
-        "outputs": [],
-        "payable": true,
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
+                "indexed": true,
                 "name": "gameId",
                 "type": "uint256"
             },
@@ -176,7 +187,29 @@ export default [
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "name": "gameId",
+                "type": "uint256"
+            },
+            {
                 "indexed": false,
+                "name": "board",
+                "type": "uint8[9]"
+            },
+            {
+                "indexed": false,
+                "name": "turn",
+                "type": "uint8"
+            }
+        ],
+        "name": "BoardState",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
                 "name": "gameId",
                 "type": "uint256"
             },
@@ -188,19 +221,5 @@ export default [
         ],
         "name": "GameResult",
         "type": "event"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_name",
-                "type": "string"
-            }
-        ],
-        "name": "createGame",
-        "outputs": [],
-        "payable": true,
-        "stateMutability": "payable",
-        "type": "function"
     }
-];
+]

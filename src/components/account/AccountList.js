@@ -22,7 +22,7 @@ export class AccountList extends React.Component {
 
         console.log('Account chosen:', account);
         web3.eth.defaultAccount = account;
-        localStorage.setItem('account', account);
+        sessionStorage.setItem('account', account);
 
         this.props.history.push('/contract')
     }

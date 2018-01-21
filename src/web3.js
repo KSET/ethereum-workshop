@@ -55,7 +55,6 @@ export function joinGame(contract, gameId) {
     return new Promise((resolve, reject) =>
         contract.joinGame(gameId, {value: contract.ENTRY_FEE}, function (error, result) {
             if (!error) {
-                console.log(result);
                 resolve(true);
             } else {
                 console.log("Error while joining game: ", gameId);
@@ -66,10 +65,8 @@ export function joinGame(contract, gameId) {
 }
 
 export function makeMove(contract, gameId, position) {
-    contract.move(gameId, position, function (error, result) {
-        if (!error) {
-            console.log(result);
-        } else {
+    contract.move(gameId, position, function (error) {
+        if (error) {
             console.log("error while making a move: ", error);
         }
     });
@@ -100,6 +97,18 @@ export function getPastBoardEvents(contract, gameId) {
     return new Promise((resolve, reject) => {
         const event = contract.BoardState({gameId: gameId}, {fromBlock: 0, toBlock: 'latest'});
         event.get(function(error, logs) {
+            if (!error) {
+                resolve(logs);
+            } else {
+                reject(error);
+            }
+        });
+    })
+}
+
+export function getCurrentBoard(contract, gameId) {
+    return new Promise((resolve, reject) => {
+        contract.getBoard(gameId, function(error, logs) {
             if (!error) {
                 resolve(logs);
             } else {
