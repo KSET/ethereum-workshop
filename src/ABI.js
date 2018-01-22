@@ -97,25 +97,6 @@ export default [
             {
                 "name": "_gameId",
                 "type": "uint256"
-            }
-        ],
-        "name": "getPlayerSymbol",
-        "outputs": [
-            {
-                "name": "",
-                "type": "string"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "_gameId",
-                "type": "uint256"
             },
             {
                 "name": "_symbol",
@@ -165,7 +146,7 @@ export default [
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "name": "gameId",
                 "type": "uint256"
             },
