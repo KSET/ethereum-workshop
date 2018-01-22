@@ -26,14 +26,22 @@ export class GameRoom extends React.Component {
         }
         let that = this;
         console.log('Starting to listen on incoming games');
+
+        // Waiting for new games
         listenOnGames(web3.contract, function (game) {
             stopLoading();
             let games = that.state.games;
             if(!that.gameExists(games, game.id)) {
-                console.log('Found game:', game);
-                games.push(game);
-                that.setState({games});
-                stopLoading();
+                getPlayerAddress(web3.contract, game.id, 1).then(result => {
+                    console.log(game);
+                    if (result === sessionStorage.getItem('account') && game.status === GameState.READY) {
+                        that.props.history.push(`/game/${game.id}`);
+                    }
+                    console.log('Found game:', game);
+                    games.push(game);
+                    that.setState({games});
+                    stopLoading();
+                });
             }
         }, function() {
             stopLoading();
@@ -45,47 +53,20 @@ export class GameRoom extends React.Component {
     }
 
     joinGame = (game) => {
-        const {web3, startLoading} = this.props;
+        const {web3, startLoading, stopLoading} = this.props;
         let that = this;
         if (game.status === GameState.WAITING) {
             console.log("My address", sessionStorage.getItem('account'));
-            console.log("Number of players active in game", localStorage.getItem(`playersCount-${game.id}`));
-            if(!localStorage.getItem(`playersCount-${game.id}`)) {
-                console.log("Game locally has no players");
-                getPlayerAddress(web3.contract, game.id, 1).then(result => {
-                    console.log("Player X address", result);
-                    if(result === sessionStorage.getItem('account')) {
-                        localStorage.setItem(`playersCount-${game.id}`, 1);
-                        sessionStorage.setItem(`playerSymbol-${game.id}`, 'X');
+            startLoading();
+
+            joinGame(web3.contract, game.id).then(() => {
+                subscribeToEvent(web3.contract, 'BoardState', function (result) {
+                    console.log('Received BoardState event', result);
+                    if(result.gameId.toNumber() === game.id) {
                         that.props.history.push(`/game/${game.id}`)
-                    } else {
-                        joinGame(web3.contract, game.id).then(result => {
-                            subscribeToEvent(web3.contract, 'BoardState', function (result) {
-                                console.log('Received BoardState event', result);
-                                if(result.gameId.toNumber() === game.id) {
-                                    localStorage.setItem(`playersCount-${game.id}`, 2);
-                                    sessionStorage.setItem(`playerSymbol-${game.id}`, 'O');
-                                    that.props.history.push(`/game/${game.id}`)
-                                }
-                            });
-                        });
-                        startLoading();
                     }
                 });
-
-            } else {
-                joinGame(web3.contract, game.id).then(result => {
-                    subscribeToEvent(web3.contract, 'BoardState', function (result) {
-                        console.log('Received BoardState event', result);
-                        if(result.gameId.toNumber() === game.id) {
-                            localStorage.setItem(`playersCount-${game.id}`, 2);
-                            sessionStorage.setItem(`playerSymbol-${game.id}`, 'O');
-                            that.props.history.push(`/game/${game.id}`)
-                        }
-                    });
-                });
-                startLoading();
-            }
+            }, (error) => stopLoading());
         }
     };
 

@@ -30,6 +30,15 @@ export class TicTacToe extends React.Component {
 
     playerSymbolConst = (number) => (number === 1 ? 'X' : 'O');
 
+    getPlayerSymbol() {
+        const { web3 } = this.props;
+        const gameId = this.props.match.params['gameId'];
+
+        return getPlayerAddress(web3.contract, gameId, 1).then(result => (
+            result === sessionStorage.getItem('account') ? 'X' : 'O'
+        ));
+    }
+
     /*
      * Initialize the game
      */
@@ -43,15 +52,17 @@ export class TicTacToe extends React.Component {
         }
 
         const gameId = this.props.match.params['gameId'];
-        let playerSymbol = sessionStorage.getItem(`playerSymbol-${gameId}`);
-        console.log('I\'m player', playerSymbol);
-        this.setState({playerSymbol});
-        this.checkIfGameFinished();
-        this.loadCurrentBoardState();
-        this.listenForBoardChanges();
-        this.checkForOtherPlayer(web3.contract, gameId, playerSymbol);
+        this.getPlayerSymbol().then(playerSymbol => {
+            console.log('I\'m player', playerSymbol);
+            this.setState({playerSymbol});
 
-        subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
+            this.checkIfGameFinished();
+            this.loadCurrentBoardState();
+            this.listenForBoardChanges();
+            this.checkForOtherPlayer(web3.contract, gameId, playerSymbol);
+
+            subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
+        });
     }
 
     checkForOtherPlayer(contract, gameId, playerSymbol) {
@@ -76,6 +87,8 @@ export class TicTacToe extends React.Component {
         } else {
             alert('It\'s a draw !');
         }
+
+        this.props.history.push('/room');
     }
 
     updateBoard(board) {
