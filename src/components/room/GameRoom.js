@@ -33,13 +33,14 @@ export class GameRoom extends React.Component {
             let games = that.state.games;
             if(!that.gameExists(games, game.id)) {
                 getPlayerAddress(web3.contract, game.id, 1).then(result => {
-                    console.log(game);
                     if (result === sessionStorage.getItem('account') && game.status === GameState.READY) {
                         that.props.history.push(`/game/${game.id}`);
                     }
                     console.log('Found game:', game);
-                    games.push(game);
-                    that.setState({games});
+                    if (game.status === GameState.WAITING) {
+                        games.push(game);
+                        that.setState({games});
+                    }
                     stopLoading();
                 });
             }
@@ -106,9 +107,6 @@ export class GameRoom extends React.Component {
                             <Row key={index} className="show-grid">
                                 <Col md={8}>
                                     {game.name}
-                                    {game.status === GameState.WAITING ? ' (Waiting for player)' : null}
-                                    {game.status === GameState.READY ? ' (Playing)' : null}
-                                    {game.status === GameState.FINISHED ? ' (Finished)' : null}
                                 </Col>
                                 <Col md={4}>
                                     {
