@@ -165,7 +165,7 @@ export class TicTacToe extends React.Component {
         makeMove(web3.contract, gameId, position, function() {
             stopLoading();
         });
-        startLoading();
+        startLoading("Waiting for other player to make his move...");
     }
 
 
