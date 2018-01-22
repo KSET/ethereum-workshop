@@ -61,7 +61,7 @@ export class TicTacToe extends React.Component {
             console.log('Other player address', result);
             if (result.startsWith('0x00000')) {
                 console.log('Waiting for player', otherPlayer);
-                startLoading();
+                startLoading("Waiting for player O to join!");
             }
         }, error => {
             console.log(error);
