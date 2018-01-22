@@ -58,7 +58,7 @@ export class TicTacToe extends React.Component {
 
     checkForOtherPlayer(contract, gameId, playerSymbol) {
         const{startLoading} = this.props;
-        let otherPlayer = playerSymbol === 'X' ? 0 : 1;
+        let otherPlayer = playerSymbol === 'X' ? 2 : 1;
         getPlayerAddress(contract, gameId, otherPlayer).then(result => {
             console.log("Other player address", result);
             if(result.startsWith('0x00000')) {
@@ -173,7 +173,7 @@ export class TicTacToe extends React.Component {
     render() {
         return (
             <div className="tic-tac-toe">
-                <Scoreboard score={this.state.score}/>
+                <Scoreboard playerSymbol={this.state.playerSymbol}/>
 
                 <Board data={this.state.board} mark={this.mark}/>
             </div>
