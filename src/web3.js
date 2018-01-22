@@ -15,6 +15,18 @@ class Web3Instance {
 
 export default new Web3Instance();
 
+export function getGame(contract, gameId) {
+    return new Promise((resolve, reject) =>
+        contract.games(gameId, function (error, result) {
+                if (!error) {
+                    resolve(result);
+                } else {
+                    reject(error);
+                }
+            }
+        ));
+}
+
 export function listenOnGames(contract, addGameCallback) {
     contract.getGamesCount(function (error, result) {
         console.log('Total number of games:', result.toNumber());
@@ -123,19 +135,6 @@ export function getCurrentBoard(contract, gameId) {
             }
         });
     })
-}
-
-export function getPlayerSymbol(contract, gameId) {
-    return new Promise((resolve, reject) =>
-        contract.getPlayerSymbol(gameId, function (error, result) {
-                if (!error) {
-                    resolve(result);
-                } else {
-                    console.log('error while fetching player symbol', error);
-                    reject(error);
-                }
-            }
-        ));
 }
 
 export function getPlayerAddress(contract, gameId, playerSymbol) {

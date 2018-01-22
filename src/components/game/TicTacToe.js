@@ -3,7 +3,7 @@ import React from 'react';
 import { Scoreboard } from './Scoreboard';
 import { Board } from './Board';
 import {
-    getCurrentBoard,
+    getCurrentBoard, getGame,
     getPastEvents,
     getPlayerAddress,
     makeMove,
@@ -34,7 +34,7 @@ export class TicTacToe extends React.Component {
      * Initialize the game
      */
     init() {
-        const { web3, stopLoading } = this.props;
+        const {web3, stopLoading} = this.props;
         stopLoading();
         // Load previous contract if user is accessing the game directly with URL
         if (web3 && !web3.contract) {
@@ -45,24 +45,22 @@ export class TicTacToe extends React.Component {
         const gameId = this.props.match.params['gameId'];
         let playerSymbol = sessionStorage.getItem(`playerSymbol-${gameId}`);
         console.log('I\'m player', playerSymbol);
-        this.setState({ playerSymbol });
+        this.setState({playerSymbol});
         this.checkIfGameFinished();
         this.loadCurrentBoardState();
         this.listenForBoardChanges();
         this.checkForOtherPlayer(web3.contract, gameId, playerSymbol);
 
-
-
         subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
     }
 
     checkForOtherPlayer(contract, gameId, playerSymbol) {
-        const{startLoading} = this.props;
+        const {startLoading} = this.props;
         let otherPlayer = playerSymbol === 'X' ? 2 : 1;
         getPlayerAddress(contract, gameId, otherPlayer).then(result => {
-            console.log("Other player address", result);
-            if(result.startsWith('0x00000')) {
-                console.log("Waiting for player", otherPlayer);
+            console.log('Other player address', result);
+            if (result.startsWith('0x00000')) {
+                console.log('Waiting for player', otherPlayer);
                 startLoading();
             }
         }, error => {
@@ -74,14 +72,14 @@ export class TicTacToe extends React.Component {
         const winner = event.args ? event.args.winner : event.winner;
 
         if (winner) {
-            alert(winner + " has won");
+            alert(winner + ' has won');
         } else {
-            alert("It's a draw !");
+            alert('It\'s a draw !');
         }
     }
 
     updateBoard(board) {
-        const { grid_size } = this.state;
+        const {grid_size} = this.state;
         const newBoard = {};
 
         for (let index = 0; index < board.length; index++) {
@@ -89,7 +87,7 @@ export class TicTacToe extends React.Component {
 
             if (mark !== 0) {
                 // Field has been played - contains symbol
-                console.log("Mark ", this.playerSymbolConst(mark), " played on position ", index);
+                console.log('Mark ', this.playerSymbolConst(mark), ' played on position ', index);
                 newBoard[Math.floor(index / grid_size) + '' + index % grid_size] = this.playerSymbolConst(mark);
             }
         }
@@ -99,25 +97,33 @@ export class TicTacToe extends React.Component {
 
 
     listenForBoardChanges() {
-        const { web3, stopLoading } = this.props;
-        const { gameId } = this.props.match.params;
+        const {web3, stopLoading, startLoading} = this.props;
+        const {gameId} = this.props.match.params;
 
         let that = this;
-        subscribeToEvent(web3.contract, "BoardState", function (result) {
-            console.log("Updating board state...", result);
+        subscribeToEvent(web3.contract, 'BoardState', function (result) {
+            console.log('Updating board state...', result);
             that.updateBoard(result.board);
-            if(that.playerSymbolConst(result.turn.toNumber()) === that.state.playerSymbol) {
+            if (that.playerSymbolConst(result.turn.toNumber()) === that.state.playerSymbol) {
                 stopLoading();
+            } else {
+                startLoading();
             }
         }, {gameId: gameId});
     }
 
 
     loadCurrentBoardState() {
-        const { gameId } = this.props.match.params;
-        const { web3 } = this.props;
+        const {gameId} = this.props.match.params;
+        const {web3, startLoading} = this.props;
 
-        console.log("Loading current board state....");
+        console.log('Loading current board state....');
+        let that = this;
+        getGame(web3.contract, gameId).then(result => {
+            if (that.playerSymbolConst(result[2].toNumber()) !== that.state.playerSymbol) {
+                startLoading();
+            }
+        });
 
         getCurrentBoard(web3.contract, gameId).then(result => this.updateBoard(result));
 
@@ -129,15 +135,15 @@ export class TicTacToe extends React.Component {
     }
 
     checkIfGameFinished() {
-        const { gameId } = this.props.match.params;
-        const { web3, stopLoading } = this.props;
+        const {gameId} = this.props.match.params;
+        const {web3, stopLoading} = this.props;
 
         let that = this;
         getPastEvents(web3.contract, 'GameResult', gameId).then(result => {
-           if (result.length > 0) {
-               stopLoading();
-               that.announceWinner(result[0]);
-           }
+            if (result.length > 0) {
+                stopLoading();
+                that.announceWinner(result[0]);
+            }
         });
     }
 
@@ -151,12 +157,12 @@ export class TicTacToe extends React.Component {
             return;
         }
 
-        const { grid_size } = this.state;
-        const { web3 } = this.props;
-        const { gameId } = this.props.match.params;
+        const {grid_size} = this.state;
+        const {web3} = this.props;
+        const {gameId} = this.props.match.params;
 
         const position = row_index * grid_size + col_index;
-        console.log("Making move on position ", position, " for gameId ", gameId);
+        console.log('Making move on position ', position, ' for gameId ', gameId);
         makeMove(web3.contract, gameId, position);
         startLoading();
     }
