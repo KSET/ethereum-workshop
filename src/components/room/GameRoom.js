@@ -1,5 +1,5 @@
 import React from 'react';
-import { createGame, joinGame, listenOnGames } from '../../web3';
+import { createGame, listenOnGames, joinGame, subscribeToEvent, getPlayerAddress } from '../../web3';
 import { Alert, Button, Col, FormControl, Row } from 'react-bootstrap';
 import { GameState } from '../../GameState';
 
@@ -26,14 +26,26 @@ export class GameRoom extends React.Component {
         }
         let that = this;
         console.log('Starting to listen on incoming games');
+
+        // Waiting for new games
         listenOnGames(web3.contract, function (game) {
             stopLoading();
             let games = that.state.games;
-            console.log('Found game:', game);
             if(!that.gameExists(games, game.id)) {
-                games.push(game);
-                that.setState({games});
+                getPlayerAddress(web3.contract, game.id, 1).then(result => {
+                    if (result === sessionStorage.getItem('account') && game.status === GameState.READY) {
+                        that.props.history.push(`/game/${game.id}`);
+                    }
+                    console.log('Found game:', game);
+                    if (game.status === GameState.WAITING) {
+                        games.push(game);
+                        that.setState({games});
+                    }
+                    stopLoading();
+                });
             }
+        }, function() {
+            stopLoading();
         });
     }
 
@@ -41,22 +53,34 @@ export class GameRoom extends React.Component {
         return games.filter(game => game.id === gameId).length > 0;
     }
 
-    joinGame = (game) => {
-        const {web3, startLoading} = this.props;
+    gameExists(games, gameId) {
+        return games.filter(game => game.id === gameId).length > 0;
+    }
 
+    joinGame = (game) => {
+        const {web3, startLoading, stopLoading} = this.props;
+        let that = this;
         if (game.status === GameState.WAITING) {
-            joinGame(web3.contract, game.id).then(result =>
-                result ? this.props.history.push(`/game/${game.id}`) : alert('Error while joining existing game'));
+            console.log("My address", sessionStorage.getItem('account'));
             startLoading();
-        } else {
-            this.props.history.push(`/game/${game.id}`);
+
+            joinGame(web3.contract, game.id).then(() => {
+                subscribeToEvent(web3.contract, 'BoardState', function (result) {
+                    console.log('Received BoardState event', result);
+                    if(result.gameId.toNumber() === game.id) {
+                        that.props.history.push(`/game/${game.id}`)
+                    }
+                });
+            }, (error) => stopLoading());
         }
     };
 
     createNewGame = (name) => {
-        const {web3, startLoading} = this.props;
+        const {web3, startLoading, stopLoading} = this.props;
         console.log('Creating game with name:', name);
-        createGame(web3.contract, name);
+        createGame(web3.contract, name).then(function(result){}, function(error) {
+            stopLoading();
+        });
         startLoading();
         this.setState({gameName: ''});
     };
@@ -87,14 +111,14 @@ export class GameRoom extends React.Component {
                             <Row key={index} className="show-grid">
                                 <Col md={8}>
                                     {game.name}
-                                    {game.status === GameState.WAITING ? ' (Waiting for player)' : null}
-                                    {game.status === GameState.READY ? ' (Playing)' : null}
-                                    {game.status === GameState.FINISHED ? ' (Finished)' : null}
                                 </Col>
                                 <Col md={4}>
-                                    <Button block bsStyle="primary" onClick={() => this.joinGame(game)}>
-                                        Join
-                                    </Button>
+                                    {
+                                        game.status === GameState.WAITING ?
+                                        <Button block bsStyle="primary" onClick={() => this.joinGame(game)}>
+                                            Join
+                                        </Button> : ''
+                                    }
                                 </Col>
                             </Row>
                         ))

@@ -13,7 +13,7 @@ export class LoadingOverlay extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.isLoading !== this.state.isLoading) {
-            this.setState({isLoading: nextProps.isLoading});
+            this.setState({isLoading: nextProps.isLoading, text: nextProps.text});
         }
     }
 
@@ -21,7 +21,7 @@ export class LoadingOverlay extends React.Component {
         return (
             <div className="loader" hidden={!this.state.isLoading}>
                 <div className="loader-content">
-                    <img src="/loader.gif" width="100" height="100" />
+                    <img src="/loader.gif" width="100" alt="spinner" height="100" />
                     <h2 className="loader-text">{this.state.text}</h2>
                 </div>
             </div>
