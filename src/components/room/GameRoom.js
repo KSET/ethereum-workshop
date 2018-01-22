@@ -1,5 +1,5 @@
 import React from 'react';
-import { createGame, listenOnGames, joinGame, subscribeToEvent } from '../../web3';
+import { createGame, listenOnGames, joinGame, subscribeToEvent, getPlayerAddress } from '../../web3';
 import { Alert, Button, Col, FormControl, Row } from 'react-bootstrap';
 import { GameState } from '../../GameState';
 
@@ -48,15 +48,44 @@ export class GameRoom extends React.Component {
         const {web3, startLoading} = this.props;
         let that = this;
         if (game.status === GameState.WAITING) {
-            joinGame(web3.contract, game.id).then(result => {
-                subscribeToEvent(web3.contract, 'BoardState', function (result) {
-                    console.log('Received BoardState event', result);
-                    if(result.gameId.toNumber() === game.id) {
+            console.log("My address", sessionStorage.getItem('account'));
+            console.log("Number of players active in game", localStorage.getItem(`playersCount-${game.id}`));
+            if(!localStorage.getItem(`playersCount-${game.id}`)) {
+                console.log("Game locally has no players");
+                getPlayerAddress(web3.contract, game.id, 1).then(result => {
+                    console.log("Player X address", result);
+                    if(result === sessionStorage.getItem('account')) {
+                        localStorage.setItem(`playersCount-${game.id}`, 1);
+                        sessionStorage.setItem(`playerSymbol-${game.id}`, 'X');
                         that.props.history.push(`/game/${game.id}`)
+                    } else {
+                        joinGame(web3.contract, game.id).then(result => {
+                            subscribeToEvent(web3.contract, 'BoardState', function (result) {
+                                console.log('Received BoardState event', result);
+                                if(result.gameId.toNumber() === game.id) {
+                                    localStorage.setItem(`playersCount-${game.id}`, 2);
+                                    sessionStorage.setItem(`playerSymbol-${game.id}`, 'O');
+                                    that.props.history.push(`/game/${game.id}`)
+                                }
+                            });
+                        });
+                        startLoading();
                     }
                 });
-            });
-            startLoading();
+
+            } else {
+                joinGame(web3.contract, game.id).then(result => {
+                    subscribeToEvent(web3.contract, 'BoardState', function (result) {
+                        console.log('Received BoardState event', result);
+                        if(result.gameId.toNumber() === game.id) {
+                            localStorage.setItem(`playersCount-${game.id}`, 2);
+                            sessionStorage.setItem(`playerSymbol-${game.id}`, 'O');
+                            that.props.history.push(`/game/${game.id}`)
+                        }
+                    });
+                });
+                startLoading();
+            }
         }
     };
 

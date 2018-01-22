@@ -6,7 +6,6 @@ import {
     getCurrentBoard,
     getPastEvents,
     getPlayerAddress,
-    getPlayerSymbol,
     makeMove,
     setContract,
     subscribeToEvent
@@ -44,15 +43,13 @@ export class TicTacToe extends React.Component {
         }
 
         const gameId = this.props.match.params['gameId'];
-
-        getPlayerSymbol(web3.contract, gameId).then(playerSymbol => {
-            console.log('I\'m player', playerSymbol);
-            this.setState({ playerSymbol });
-            this.checkIfGameFinished();
-            this.loadCurrentBoardState();
-            this.listenForBoardChanges();
-            this.checkForOtherPlayer(web3.contract, gameId, playerSymbol);
-        });
+        let playerSymbol = sessionStorage.getItem(`playerSymbol-${gameId}`);
+        console.log('I\'m player', playerSymbol);
+        this.setState({ playerSymbol });
+        this.checkIfGameFinished();
+        this.loadCurrentBoardState();
+        this.listenForBoardChanges();
+        this.checkForOtherPlayer(web3.contract, gameId, playerSymbol);
 
 
 
