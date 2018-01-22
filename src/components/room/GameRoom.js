@@ -30,9 +30,15 @@ export class GameRoom extends React.Component {
             stopLoading();
             let games = that.state.games;
             console.log('Found game:', game);
-            games.push(game);
-            that.setState({games});
+            if(!that.gameExists(games, game.id)) {
+                games.push(game);
+                that.setState({games});
+            }
         });
+    }
+
+    gameExists(games, gameId) {
+        return games.filter(game => game.id === gameId).length > 0;
     }
 
     joinGame = (game) => {
