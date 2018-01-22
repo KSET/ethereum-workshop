@@ -53,6 +53,10 @@ export class GameRoom extends React.Component {
         return games.filter(game => game.id === gameId).length > 0;
     }
 
+    gameExists(games, gameId) {
+        return games.filter(game => game.id === gameId).length > 0;
+    }
+
     joinGame = (game) => {
         const {web3, startLoading, stopLoading} = this.props;
         let that = this;
