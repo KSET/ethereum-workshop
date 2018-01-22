@@ -1,5 +1,5 @@
 import React from 'react';
-import { createGame, getPlayerSymbol, joinGame, listenOnGames } from '../../web3';
+import { createGame, listenOnGames, joinGame, subscribeToEvent } from '../../web3';
 import { Alert, Button, Col, FormControl, Row } from 'react-bootstrap';
 import { GameState } from '../../GameState';
 
@@ -29,11 +29,6 @@ export class GameRoom extends React.Component {
         listenOnGames(web3.contract, function (game) {
             stopLoading();
             let games = that.state.games;
-            getPlayerSymbol(web3.contract, game.id).then(result => {
-                    if(result === 'X' || result === 'O') {
-                        that.props.history.push(`/game/${game.id}`);
-                    }
-            });
             if(!that.gameExists(games, game.id)) {
                 console.log('Found game:', game);
                 games.push(game);
@@ -51,13 +46,17 @@ export class GameRoom extends React.Component {
 
     joinGame = (game) => {
         const {web3, startLoading} = this.props;
-
+        let that = this;
         if (game.status === GameState.WAITING) {
-            joinGame(web3.contract, game.id).then(result =>
-                result ? this.props.history.push(`/game/${game.id}`) : alert('Error while joining existing game'));
+            joinGame(web3.contract, game.id).then(result => {
+                subscribeToEvent(web3.contract, 'BoardState', function (result) {
+                    console.log('Received BoardState event', result);
+                    if(result.gameId.toNumber() === game.id) {
+                        that.props.history.push(`/game/${game.id}`)
+                    }
+                });
+            });
             startLoading();
-        } else {
-            this.props.history.push(`/game/${game.id}`);
         }
     };
 

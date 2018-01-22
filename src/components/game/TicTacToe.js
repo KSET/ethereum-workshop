@@ -1,8 +1,16 @@
 import React from 'react';
 
-import { Scoreboard } from "./Scoreboard";
-import { Board } from "./Board";
-import {getPastEvents, getCurrentBoard, getPlayerSymbol, makeMove, setContract, subscribeToEvent} from "../../web3";
+import { Scoreboard } from './Scoreboard';
+import { Board } from './Board';
+import {
+    getCurrentBoard,
+    getPastEvents,
+    getPlayerAddress,
+    getPlayerSymbol,
+    makeMove,
+    setContract,
+    subscribeToEvent
+} from '../../web3';
 
 export class TicTacToe extends React.Component {
     constructor() {
@@ -18,6 +26,7 @@ export class TicTacToe extends React.Component {
                 O: 0
             }
         };
+        this.checkForOtherPlayer = this.checkForOtherPlayer.bind(this);
     }
 
     playerSymbolConst = (number) => (number === 1 ? 'X' : 'O');
@@ -37,15 +46,31 @@ export class TicTacToe extends React.Component {
         const gameId = this.props.match.params['gameId'];
 
         getPlayerSymbol(web3.contract, gameId).then(playerSymbol => {
-            console.log(playerSymbol);
+            console.log('I\'m player', playerSymbol);
             this.setState({ playerSymbol });
-
             this.checkIfGameFinished();
             this.loadCurrentBoardState();
             this.listenForBoardChanges();
+            this.checkForOtherPlayer(web3.contract, gameId, playerSymbol);
         });
 
+
+
         subscribeToEvent(web3.contract, 'GameResult', this.announceWinner);
+    }
+
+    checkForOtherPlayer(contract, gameId, playerSymbol) {
+        const{startLoading} = this.props;
+        let otherPlayer = playerSymbol === 'X' ? 0 : 1;
+        getPlayerAddress(contract, gameId, otherPlayer).then(result => {
+            console.log("Other player address", result);
+            if(result.startsWith('0x00000')) {
+                console.log("Waiting for player", otherPlayer);
+                startLoading();
+            }
+        }, error => {
+            console.log(error);
+        })
     }
 
     announceWinner(event) {
@@ -77,13 +102,16 @@ export class TicTacToe extends React.Component {
 
 
     listenForBoardChanges() {
-        const { web3 } = this.props;
+        const { web3, stopLoading } = this.props;
         const { gameId } = this.props.match.params;
 
         let that = this;
         subscribeToEvent(web3.contract, "BoardState", function (result) {
             console.log("Updating board state...", result);
             that.updateBoard(result.board);
+            if(that.playerSymbolConst(result.turn.toNumber()) === that.state.playerSymbol) {
+                stopLoading();
+            }
         }, {gameId: gameId});
     }
 
@@ -155,4 +183,5 @@ export class TicTacToe extends React.Component {
 
         )
     }
+
 }

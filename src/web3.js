@@ -137,3 +137,16 @@ export function getPlayerSymbol(contract, gameId) {
             }
         ));
 }
+
+export function getPlayerAddress(contract, gameId, playerSymbol) {
+    return new Promise((resolve, reject) =>
+        contract.getPlayerAddress(gameId, playerSymbol, function (error, result) {
+                if (!error) {
+                    resolve(result);
+                } else {
+                    console.log('error while fetching player address', error);
+                    reject(error);
+                }
+            }
+        ));
+}
