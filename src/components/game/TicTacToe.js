@@ -81,7 +81,7 @@ export class TicTacToe extends React.Component {
     updateBoard(board) {
         const {grid_size} = this.state;
         const newBoard = {};
-
+        console.log("Updating board...", board);
         for (let index = 0; index < board.length; index++) {
             const mark = board[index].toNumber();
 
@@ -97,7 +97,7 @@ export class TicTacToe extends React.Component {
 
 
     listenForBoardChanges() {
-        const {web3, stopLoading, startLoading} = this.props;
+        const {web3, stopLoading} = this.props;
         const {gameId} = this.props.match.params;
 
         let that = this;
@@ -106,8 +106,6 @@ export class TicTacToe extends React.Component {
             that.updateBoard(result.board);
             if (that.playerSymbolConst(result.turn.toNumber()) === that.state.playerSymbol) {
                 stopLoading();
-            } else {
-                startLoading();
             }
         }, {gameId: gameId});
     }
@@ -120,8 +118,9 @@ export class TicTacToe extends React.Component {
         console.log('Loading current board state....');
         let that = this;
         getGame(web3.contract, gameId).then(result => {
+            console.log("Got game", result);
             if (that.playerSymbolConst(result[2].toNumber()) !== that.state.playerSymbol) {
-                startLoading();
+                startLoading("Waiting for other player to make his move...");
             }
         });
 
@@ -151,7 +150,7 @@ export class TicTacToe extends React.Component {
      * Mark particular column
      */
     mark(row_index, col_index) {
-        const {startLoading} = this.props;
+        const {startLoading, stopLoading} = this.props;
         // Return If already marked
         if (this.state.board[row_index + '' + col_index]) {
             return;
@@ -163,7 +162,9 @@ export class TicTacToe extends React.Component {
 
         const position = row_index * grid_size + col_index;
         console.log('Making move on position ', position, ' for gameId ', gameId);
-        makeMove(web3.contract, gameId, position);
+        makeMove(web3.contract, gameId, position, function() {
+            stopLoading();
+        });
         startLoading();
     }
 

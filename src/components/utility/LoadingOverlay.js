@@ -13,7 +13,7 @@ export class LoadingOverlay extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.isLoading !== this.state.isLoading) {
-            this.setState({isLoading: nextProps.isLoading});
+            this.setState({isLoading: nextProps.isLoading, text: nextProps.text});
         }
     }
 

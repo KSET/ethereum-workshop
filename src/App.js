@@ -15,8 +15,8 @@ export default class App extends React.Component {
         this.stopLoading = this.stopLoading.bind(this);
     }
 
-    startLoading() {
-        this.setState({isLoading: true});
+    startLoading(text) {
+        this.setState({isLoading: true, text: text ? text : 'Mining transaction...Please Wait!'});
     }
 
     stopLoading() {
@@ -32,7 +32,7 @@ export default class App extends React.Component {
             <div>
                 <LoadingOverlay
                     isLoading={this.state.isLoading}
-                    text={'Mining transaction...Please Wait!'}
+                    text={this.state.text}
                 >
                 </LoadingOverlay>
                 <h1 className="title">Tic-Tac-Toe on Ethereum blockchain!</h1>

@@ -21,6 +21,7 @@ export function getGame(contract, gameId) {
                 if (!error) {
                     resolve(result);
                 } else {
+                    console.log("Failed to fetch the game", error);
                     reject(error);
                 }
             }
@@ -83,10 +84,11 @@ export function joinGame(contract, gameId) {
         ))
 }
 
-export function makeMove(contract, gameId, position) {
+export function makeMove(contract, gameId, position, onError) {
     contract.move(gameId, position, function (error) {
         if (error) {
             console.log('error while making a move: ', error);
+            onError();
         }
     });
 }
