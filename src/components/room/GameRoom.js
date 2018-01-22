@@ -33,7 +33,7 @@ export class GameRoom extends React.Component {
             let games = that.state.games;
             if(!that.gameExists(games, game.id)) {
                 getPlayerAddress(web3.contract, game.id, 1).then(result => {
-                    if (result === sessionStorage.getItem('account') && game.status === GameState.READY) {
+                    if (result === sessionStorage.getItem('account') && game.status === GameState.WAITING) {
                         that.props.history.push(`/game/${game.id}`);
                     }
                     console.log('Found game:', game);
@@ -47,10 +47,6 @@ export class GameRoom extends React.Component {
         }, function() {
             stopLoading();
         });
-    }
-
-    gameExists(games, gameId) {
-        return games.filter(game => game.id === gameId).length > 0;
     }
 
     gameExists(games, gameId) {
